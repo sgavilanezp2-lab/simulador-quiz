@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simulador de Preguntas</title>
+  <meta name="description" content="Simulador para estudiar y practicar: selecciona una materia y responde 15 preguntas al azar. Modo estudio o examen." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+  <!-- Tailwind CDN (sin build) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+  <main class="max-w-3xl mx-auto p-4 md:p-8">
+    <header class="mb-6">
+      <h1 class="text-3xl md:text-4xl font-bold">Simulador de Preguntas</h1>
+      <p class="text-gray-600">Elige una materia, modo y tiempo. Se seleccionan <b>15 preguntas al azar</b>.</p>
+    </header>
+
+    <section class="grid md:grid-cols-2 gap-3 items-end mb-4">
+      <div>
+        <label class="block text-sm font-medium mb-1" for="materia">Materia</label>
+        <select id="materia" class="w-full rounded-2xl border px-3 py-2">
+          <option value="web">Desarrollo Web</option>
+          <option value="investigacion">Diseño de Investigación</option>
+          <option value="software2">Ingeniería de Software II</option>
+          <option value="liderazgo">Liderazgo</option>
+          <option value="mineria">Minería de Datos</option>
+          <option value="redes">Conmutación y Enrutamiento</option>
+        </select>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium mb-1" for="modo">Modo</label>
+          <select id="modo" class="w-full rounded-2xl border px-3 py-2">
+            <option value="estudio">Estudio (feedback inmediato)</option>
+            <option value="examen">Examen (feedback al final)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="minutos">Tiempo</label>
+          <select id="minutos" class="w-full rounded-2xl border px-3 py-2">
+            <option value="60">60 min</option>
+            <option value="45">45 min</option>
+            <option value="30">30 min</option>
+            <option value="15">15 min</option>
+            <option value="0">Sin tiempo</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="flex gap-3 mb-4 items-center">
+      <button id="btnEmpezar" class="rounded-2xl px-4 py-2 border bg-white hover:bg-gray-100">Empezar</button>
+      <button id="btnGuardar" class="rounded-2xl px-4 py-2 border bg-white hover:bg-gray-100" title="Guarda tu progreso en este dispositivo">Guardar</button>
+      <button id="btnCargar" class="rounded-2xl px-4 py-2 border bg-white hover:bg-gray-100" title="Carga el último progreso guardado">Cargar</button>
+      <div class="ml-auto font-semibold" id="timer">--:--</div>
+    </section>
+
+    <section id="estado" class="rounded-2xl border p-4 bg-white">Elige una materia y presiona <b>Empezar</b>.</section>
+
+    <section id="contenedor" class="mt-4"></section>
+
+    <footer class="mt-10 text-xs text-gray-500">
+      <p>Nota: Este simulador funciona 100% en el navegador (GitHub Pages). Los bancos de preguntas están en JSON.</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

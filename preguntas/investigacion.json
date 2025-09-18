@@ -1,0 +1,23 @@
+[
+  {
+    "pregunta": "¿Qué es una hipótesis en una investigación?",
+    "opciones": [
+      "Una suposición verificable",
+      "Un resultado final",
+      "Un instrumento de medición",
+      "Un marco teórico"
+    ],
+    "respuesta": 0,
+    "explicacion": "La hipótesis es una proposición que puede ser comprobada mediante métodos científicos."
+  },
+  {
+    "pregunta": "¿Qué tipo de estudio observa fenómenos sin manipulación del investigador?",
+    "opciones": [
+      "Experimental",
+      "Cuasi-experimental",
+      "No experimental",
+      "Longitudinal"
+    ],
+    "respuesta": 2
+  }
+]
