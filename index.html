@@ -1,63 +1,114 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Simulador de Preguntas · Firebase</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 text-gray-900">
-  <main class="max-w-3xl mx-auto p-4 md:p-8">
-    <h1 class="text-3xl font-bold mb-4">Simulador de preguntas</h1>
 
-    <section id="authPanel" class="border p-4 mb-6 bg-white rounded-xl">
-      <h2 class="text-xl mb-2">Acceso</h2>
-      <input id="email" type="email" placeholder="Correo" class="border p-2 rounded w-full mb-2" />
-      <input id="password" type="password" placeholder="Contraseña" class="border p-2 rounded w-full mb-2" />
-      <div class="flex gap-2 mb-2">
-        <button id="btnLogin" class="border px-3 py-1 rounded">Entrar</button>
-        <button id="btnRegistro" class="border px-3 py-1 rounded">Registrar</button>
-        <button id="btnGoogle" class="border px-3 py-1 rounded">Google</button>
-        <button id="btnLogout" class="border px-3 py-1 rounded hidden">Salir</button>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+
+  <style>
+    /* Detalles finos (opcional) */
+    .card { @apply bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100; }
+    .btn  { @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm transition hover:-translate-y-0.5 active:translate-y-0; }
+    .btn-primary { @apply bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700; }
+    .btn-ghost   { @apply bg-white hover:bg-gray-50; }
+    .pill { @apply text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border; }
+    .opt { @apply w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition; }
+    .opt[disabled] { @apply opacity-90; }
+    .ring-ok { @apply ring-2 ring-green-300; }
+    .ring-sel { @apply ring-2 ring-indigo-300; }
+    /* Dark mode */
+    .dark body { @apply bg-slate-950 text-slate-100; }
+    .dark .card { @apply bg-slate-900/70 border-slate-800; }
+    .dark .btn-ghost { @apply bg-slate-900 hover:bg-slate-800 border-slate-700; }
+    .dark .pill { @apply bg-slate-800 text-slate-200 border-slate-700; }
+    .dark .opt { @apply bg-slate-900 border-slate-700 hover:bg-slate-800; }
+  </style>
+</head>
+<body class="min-h-full bg-gradient-to-b from-slate-50 to-slate-100">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-white/70 backdrop-blur border-b">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="text-2xl">🧠</div>
+      <h1 class="font-semibold text-lg sm:text-xl">Simulador de preguntas</h1>
+      <div class="ml-auto flex items-center gap-2">
+        <span id="userInfo" class="hidden sm:inline text-sm text-gray-600"></span>
+        <button id="btnLogout" class="btn btn-ghost hidden">Salir</button>
+        <button id="toggleDark" class="btn btn-ghost" title="Modo oscuro">🌙</button>
       </div>
-      <div id="authMsg" class="text-sm text-gray-600"></div>
-      <div id="userInfo" class="text-sm text-gray-600"></div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
+    <!-- Login -->
+    <section id="authPanel" class="card p-5">
+      <h2 class="text-xl font-semibold mb-3">Acceso</h2>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <input id="email" type="email" placeholder="Correo" class="border rounded-xl px-3 py-2" />
+        <input id="password" type="password" placeholder="Contraseña" class="border rounded-xl px-3 py-2" />
+      </div>
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button id="btnLogin" class="btn btn-primary">Entrar</button>
+        <button id="btnRegistro" class="btn btn-ghost">Registrar</button>
+        <button id="btnGoogle" class="btn btn-ghost">Google</button>
+      </div>
+      <p id="authMsg" class="text-sm text-gray-500 mt-2"></p>
     </section>
 
-    <section id="appPanel" class="hidden">
-      <div class="flex gap-2 mb-4">
-        <select id="materia" class="border p-2 rounded">
+    <!-- App -->
+    <section id="appPanel" class="card p-5 hidden">
+      <div class="flex flex-wrap gap-3 items-center">
+        <select id="materia" class="border rounded-xl px-3 py-2">
           <option value="web">Desarrollo Web</option>
           <option value="investigacion">Investigación</option>
           <option value="escalabilidad">Escalabilidad de redes</option>
         </select>
-        <select id="modo" class="border p-2 rounded">
-          <option value="estudio">Estudio</option>
+        <select id="modo" class="border rounded-xl px-3 py-2">
+          <option value="estudio">Estudio (feedback)</option>
           <option value="examen">Examen</option>
         </select>
-        <select id="minutos" class="border p-2 rounded">
-          <option value="60">60</option>
-          <option value="30">30</option>
-          <option value="15">15</option>
+        <select id="minutos" class="border rounded-xl px-3 py-2">
+          <option value="60">60 min</option>
+          <option value="30">30 min</option>
+          <option value="15">15 min</option>
           <option value="0">Sin tiempo</option>
         </select>
+
+        <div class="ml-auto flex items-center gap-2">
+          <span class="pill">⏱ <span id="timer">--:--</span></span>
+        </div>
       </div>
-      <div class="flex gap-2 mb-4">
-        <button id="btnEmpezar" class="border px-3 py-1 rounded">Empezar</button>
-        <button id="btnGuardar" class="border px-3 py-1 rounded">Guardar</button>
-        <button id="btnCargar" class="border px-3 py-1 rounded">Cargar</button>
-        <div class="ml-auto" id="timer">--:--</div>
+
+      <div class="flex flex-wrap gap-2 mt-4">
+        <button id="btnEmpezar" class="btn btn-primary">Empezar</button>
+        <button id="btnGuardar" class="btn btn-ghost">Guardar</button>
+        <button id="btnCargar"  class="btn btn-ghost">Cargar</button>
       </div>
-      <div id="estado" class="border p-3 rounded bg-white mb-3">Selecciona materia y presiona empezar</div>
-      <div id="contenedor"></div>
+
+      <div id="estado" class="mt-4 p-3 rounded-xl border bg-white/60">Selecciona materia y presiona empezar</div>
+      <div id="contenedor" class="mt-4"></div>
     </section>
   </main>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-  <script src="firebase-init.js"></script>
-  <script src="auth.js"></script>
-  <script src="app.js"></script>
+
+  <script src="firebase-init.js?v=11"></script>
+  <script src="auth.js?v=11"></script>
+  <script src="app.js?v=11"></script>
+
+  <script>
+    // Toggle dark mode
+    document.getElementById('toggleDark')?.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+    });
+  </script>
 </body>
 </html>
