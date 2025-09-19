@@ -1,7 +1,8 @@
 // --- Config y estado ---
 const mapaMaterias = {
   web: 'preguntas/web.json',
-  investigacion: 'preguntas/investigacion.json'
+  investigacion: 'preguntas/investigacion.json',
+  escalabilidad: 'preguntas/escalabilidad.json'
 };
 
 const estado       = document.getElementById('estado');
