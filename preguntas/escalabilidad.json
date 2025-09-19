@@ -1,0 +1,154 @@
+[
+  {
+    "pregunta": "¿Qué son las redes troncales?",
+    "opciones": [
+      "La conexión de dispositivos dentro de una misma LAN",
+      "La unión o interconexión entre redes grandes y pequeñas",
+      "Un conjunto de cables telefónicos",
+      "Una red de uso doméstico"
+    ],
+    "respuesta": 1,
+    "explicacion": "Permiten la interconexión de varias redes en distintas ubicaciones geográficas, formando una súper red como Internet."
+  },
+  {
+    "pregunta": "¿Cuál fue la primera red troncal de Internet?",
+    "opciones": [
+      "ARPANET",
+      "NSFNET",
+      "TCP/IP",
+      "WDM"
+    ],
+    "respuesta": 1,
+    "explicacion": "NSFNET fue creada por la National Science Foundation en 1987 y operaba a 1.544 Mbps."
+  },
+  {
+    "pregunta": "¿Cómo se clasifican las redes troncales?",
+    "opciones": [
+      "Por su velocidad",
+      "Por el tipo de cables que usan",
+      "Por capa de interconexión y topología",
+      "Por el número de usuarios"
+    ],
+    "respuesta": 2
+  },
+  {
+    "pregunta": "¿Qué son las redes troncales de capa lógica?",
+    "opciones": [
+      "Redes que utilizan fibra óptica",
+      "Redes que operan con protocolos como Frame Relay, ATM e IP",
+      "Redes que solo funcionan con TCP",
+      "Redes satelitales"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Qué son las redes troncales de capa física?",
+    "opciones": [
+      "Redes que transmiten datos mediante cables eléctricos",
+      "Redes que usan tecnologías como SDH/SONET, WDM, OTN, GMPLS",
+      "Redes que funcionan con conexiones Wi-Fi",
+      "Redes que operan sin cables"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Qué característica tiene Frame Relay?",
+    "opciones": [
+      "Transmite la información por medio de tramas",
+      "Converge tecnologías",
+      "Usa fibra óptica",
+      "Trabaja con señales eléctricas"
+    ],
+    "respuesta": 0
+  },
+  {
+    "pregunta": "¿Qué hace el protocolo Frame Relay respecto a los errores?",
+    "opciones": [
+      "Corrige todos los errores",
+      "Ignora la corrección de errores para ser más rápido",
+      "Duplica los datos para evitar errores",
+      "Solo detecta pero no corrige errores"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Qué significa ATM?",
+    "opciones": [
+      "Acceso Total de Medios",
+      "Modo de Transferencia Asincrónico",
+      "Aplicación de Transmisión Móvil",
+      "Acceso de Tráfico de Medios"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Qué requiere ATM antes de enviar datos?",
+    "opciones": [
+      "Establecer una conexión",
+      "Codificar en binario",
+      "Un servidor DNS",
+      "Una IP pública"
+    ],
+    "respuesta": 0
+  },
+  {
+    "pregunta": "¿Qué hace el protocolo IP?",
+    "opciones": [
+      "Conecta redes sin usar direcciones",
+      "Funciona con conexiones dinámicas y direcciona paquetes por IP",
+      "Funciona solo con redes físicas",
+      "Administra usuarios de una red"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Qué capa representa IP en el modelo TCP/IP?",
+    "opciones": [
+      "Capa de Red",
+      "Capa de Aplicación",
+      "Capa de Sesión",
+      "Capa Física"
+    ],
+    "respuesta": 0
+  },
+  {
+    "pregunta": "¿Qué característica tienen SONET y SDH?",
+    "opciones": [
+      "Funcionan con cobre",
+      "Usan señales de luz por fibra óptica",
+      "Usan señales de radio",
+      "No usan cables"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Qué es WDM?",
+    "opciones": [
+      "Multiplexación por división de longitud de onda",
+      "Un tipo de cable de cobre",
+      "Un protocolo de red IP",
+      "Una técnica de compresión de datos"
+    ],
+    "respuesta": 0
+  },
+  {
+    "pregunta": "¿Qué permite OTN?",
+    "opciones": [
+      "Transmitir solo voz",
+      "Adaptarse a las nuevas tecnologías sobre IP",
+      "Conectar redes Wi-Fi",
+      "Reducir el tamaño de los paquetes"
+    ],
+    "respuesta": 1
+  },
+  {
+    "pregunta": "¿Cuál es la función principal de NGN?",
+    "opciones": [
+      "Intercambiar cables",
+      "Converger tecnologías antiguas y nuevas",
+      "Transmitir señales eléctricas únicamente",
+      "Codificar datos en XML"
+    ],
+    "respuesta": 1
+  }
+]
