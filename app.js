@@ -1,3 +1,7 @@
+// ===============================
+// APP v12 - Simulador de preguntas
+// ===============================
+
 // --- Config y estado ---
 const mapaMaterias = {
   web: 'preguntas/web.json',
@@ -49,42 +53,57 @@ function iniciarTimer(){
   },1000);
 }
 
-// --- Render pregunta + feedback ---
+// --- Render pregunta + feedback (estilo mejorado) ---
 function mostrarPregunta(){
-  if(idx >= ronda.length){ finalizar(false); return; }
+  if (idx >= ronda.length) { finalizar(false); return; }
   const q = ronda[idx];
 
   contenedor.innerHTML = `
-    <div class="border p-3 bg-white rounded">
-      <h2 class="font-semibold">Pregunta ${idx+1} de ${ronda.length}</h2>
-      <p class="mt-2 mb-3">${q.pregunta}</p>
-      <div id="opciones"></div>
-      <div id="feedback" class="mt-3 text-sm"></div>
-      <div class="mt-4 flex gap-2">
-        <button id="btnPrev" class="border px-3 py-1 rounded" ${idx===0?'disabled':''}>Anterior</button>
-        <button id="btnNext" class="border px-3 py-1 rounded">Siguiente</button>
-        <button id="btnFin"  class="ml-auto border px-3 py-1 rounded">Finalizar</button>
+    <div class="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100 p-5">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border">Pregunta ${idx+1} / ${ronda.length}</span>
+      </div>
+
+      <h2 class="text-lg font-semibold mb-3">${q.pregunta}</h2>
+
+      <div id="opciones" class="space-y-2"></div>
+
+      <div id="feedback" class="mt-4 text-sm"></div>
+
+      <div class="mt-5 flex gap-2">
+        <button id="btnPrev" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition"
+                ${idx===0 ? "disabled" : ""}>Anterior</button>
+
+        <button id="btnNext" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition">
+          Siguiente
+        </button>
+
+        <button id="btnFin" class="ml-auto px-4 py-2 rounded-xl border bg-indigo-600 text-white hover:bg-indigo-700 transition">
+          Finalizar
+        </button>
       </div>
     </div>
   `;
 
-  // opciones
+  // Opciones con mejor estilo visual
   const wrap = document.getElementById('opciones');
   wrap.innerHTML = q.opciones.map((op,i)=>`
-    <button class="opcion border block w-full text-left p-2 my-1 rounded" data-i="${i}">
+    <button
+      class="opcion w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition"
+      data-i="${i}">
       ${op}
     </button>
   `).join('');
 
-  // listeners
+  // Listeners
   wrap.querySelectorAll('.opcion').forEach(btn=>{
-    btn.addEventListener('click',()=>responder(parseInt(btn.dataset.i,10)));
+    btn.addEventListener('click', () => responder(parseInt(btn.dataset.i,10)));
   });
-  document.getElementById('btnPrev').onclick = ()=>{ if(idx>0){ idx--; mostrarPregunta(); } };
-  document.getElementById('btnNext').onclick = ()=>{ if(idx<ronda.length-1){ idx++; mostrarPregunta(); } else { finalizar(false); } };
-  document.getElementById('btnFin').onclick  = ()=>finalizar(false);
+  document.getElementById('btnPrev').onclick = () => { if (idx>0) { idx--; mostrarPregunta(); } };
+  document.getElementById('btnNext').onclick = () => { if (idx<ronda.length-1) { idx++; mostrarPregunta(); } else { finalizar(false); } };
+  document.getElementById('btnFin').onclick  = () => finalizar(false);
 
-  // si ya había respuesta, refléjala
+  // Si ya había respuesta, refléjala
   if (respuestas[idx] != null){
     deshabilitarOpciones(q.respuesta, respuestas[idx], modoSel.value==='examen');
     if (modoSel.value==='estudio'){
@@ -95,6 +114,10 @@ function mostrarPregunta(){
 
 function responder(iElegido){
   const q = ronda[idx];
+  // si el usuario cambia de opción en estudio, ajustamos el conteo
+  if (modoSel.value === 'estudio' && respuestas[idx] !== undefined) {
+    if (respuestas[idx] === q.respuesta) correctas--; // quitamos la anterior si era correcta
+  }
   respuestas[idx] = iElegido;
 
   if (modoSel.value === 'estudio'){
@@ -124,8 +147,14 @@ function mostrarFeedback(ok, q){
 function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
   document.querySelectorAll('#opciones .opcion').forEach((b,i)=>{
     b.disabled = true;
-    if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) b.classList.add('ring','ring-green-300');
-    if (i===indiceElegida) b.classList.add('ring','ring-gray-300');
+    b.classList.add('disabled:opacity-80');
+    // Marca visual: correcta en verde, elegida con aro indigo
+    if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) {
+      b.classList.add('ring-2','ring-green-300');
+    }
+    if (i===indiceElegida) {
+      b.classList.add('ring-2','ring-indigo-300');
+    }
   });
 }
 
@@ -200,4 +229,5 @@ btnCargar && (btnCargar.onclick = ()=>{
     mostrarPregunta(); iniciarTimer();
   }catch(e){ alert('No pude cargar el progreso.'); }
 });
+
 
