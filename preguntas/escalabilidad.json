@@ -153,3 +153,16 @@
     "explicacion": "En una backbone paralela, el tráfico se distribuye en múltiples rutas, evitando cuellos de botella y mejorando el rendimiento general."
   }
 ]
+{
+  "pregunta": "Según la topología mostrada en la imagen, ¿¿Cuál es la prioridad por defecto del Router 3 pasivo?",
+  "opciones": [
+    "100",
+    "225",
+    "150",
+    "255"
+  ],
+  "respuesta": 0,
+  "explicacion": "El valor 100 representa el costo acumulado más eficiente para alcanzar el servidor desde PC-A según la topología OSPF.",
+  "imagen": "img/topología-prioridad.png"
+}
+
