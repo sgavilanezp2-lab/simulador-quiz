@@ -163,6 +163,7 @@
   ],
   "respuesta": 0,
   "explicacion": "El valor 100 representa el costo acumulado más eficiente para alcanzar el servidor desde PC-A según la topología OSPF.",
-  "imagen": "img/topología-prioridad.png"
+  "imagen": "img/topologia-prioridad.png"
 }
+
 
