@@ -1,154 +1,155 @@
 [
   {
-    "pregunta": "¿Qué son las redes troncales?",
+    "pregunta": "Para establecer las necesidades de infraestructura de red, a continuación establezca el número de dispositivos que corresponde a una red mediana.",
     "opciones": [
-      "La conexión de dispositivos dentro de una misma LAN",
-      "La unión o interconexión entre redes grandes y pequeñas",
-      "Un conjunto de cables telefónicos",
-      "Una red de uso doméstico"
+      "Más de 1000",
+      "1000 a 2000",
+      "Hasta 200",
+      "200 a 1000"
+    ],
+    "respuesta": 3,
+    "explicacion": "Una red mediana generalmente abarca entre 200 y 1000 dispositivos, lo que requiere una infraestructura intermedia entre la de una pequeña y una gran empresa."
+  },
+  {
+    "pregunta": "¿Cuál de las siguientes afirmaciones NO es una característica inherente a la escalabilidad de las redes troncales en el contexto de las infraestructuras de red Cisco?",
+    "opciones": [
+      "Capacidad para soportar un aumento significativo en el tráfico de red sin degradación del rendimiento.",
+      "Adaptación automática a cambios en la topología de la red, como la adición o eliminación de dispositivos, sin interrupciones en el servicio.",
+      "Distribución eficiente del tráfico entre múltiples enlaces para evitar cuellos de botella y maximizar el ancho de banda disponible.",
+      "Facilidad de implementación de nuevas tecnologías y protocolos sin necesidad de rediseñar la arquitectura de red existente."
     ],
     "respuesta": 1,
-    "explicacion": "Permiten la interconexión de varias redes en distintas ubicaciones geográficas, formando una súper red como Internet."
+    "explicacion": "La escalabilidad permite crecimiento y adaptación, pero los cambios en la topología normalmente requieren reconfiguración manual o supervisión, no son totalmente automáticos."
   },
   {
-    "pregunta": "¿Cuál fue la primera red troncal de Internet?",
+    "pregunta": "En el contexto de redes de telecomunicaciones, ¿cuál es la principal función de una red troncal (backbone) dentro de una infraestructura de red?",
     "opciones": [
-      "ARPANET",
-      "NSFNET",
-      "TCP/IP",
-      "WDM"
+      "Proporcionar redundancia a nivel de capa de enlace de datos mediante la implementación de protocolos como STP",
+      "Permitir la comunicación directa entre dispositivos finales sin necesidad de un router.",
+      "Interconectar múltiples redes LAN y WAN, facilitando el transporte eficiente de datos a través de grandes distancias.",
+      "Optimizar la asignación de direcciones IP a través de un sistema jerárquico basado en la subred."
+    ],
+    "respuesta": 2,
+    "explicacion": "La red troncal actúa como columna vertebral, conectando distintas redes locales o amplias y transportando grandes volúmenes de tráfico."
+  },
+  {
+    "pregunta": "Arquitectura de red que utiliza múltiples conexiones troncales para proporcionar redundancia, escalabilidad y rendimiento.",
+    "opciones": [
+      "Backbone distribuida",
+      "Backbone colapsada",
+      "Backbone en serie",
+      "Backbone paralela"
+    ],
+    "respuesta": 0,
+    "explicacion": "La backbone distribuida conecta múltiples troncales interrelacionadas, ofreciendo mayor tolerancia a fallos y capacidad de expansión."
+  },
+  {
+    "pregunta": "Determine a qué tipo de red troncal corresponde la siguiente descripción: Es un tipo de arquitectura de red en la que la función de la red backbone se concentra en un único dispositivo central, generalmente un switch o router de gran capacidad.",
+    "opciones": [
+      "Backbone paralela",
+      "Backbone distribuida",
+      "Backbone en serie",
+      "Backbone colapsada"
+    ],
+    "respuesta": 3,
+    "explicacion": "La backbone colapsada centraliza el control y la distribución del tráfico en un único dispositivo potente, simplificando la administración."
+  },
+  {
+    "pregunta": "¿Cuál es el comando para activar el protocolo HSRP?",
+    "opciones": [
+      "stand HSRP",
+      "Stanby HSRP",
+      "HSRP stand by",
+      "standby version 2"
+    ],
+    "respuesta": 3,
+    "explicacion": "El comando 'standby version 2' se utiliza en la configuración de interfaces para habilitar la versión 2 del protocolo HSRP."
+  },
+  {
+    "pregunta": "¿Cuál es la principal característica de los Circuitos Virtuales Permanentes (PVC) en una red Frame Relay en comparación con una conexión dedicada?",
+    "opciones": [
+      "Los PVC en Frame Relay requieren un nuevo establecimiento de conexión para cada transmisión de datos, incrementando la sobrecarga de la red.",
+      "Los PVC garantizan ancho de banda dedicado entre el origen y destino, al igual que una conexión dedicada tradicional.",
+      "Los PVC permiten la creación de rutas lógicas sobre la infraestructura compartida de Frame Relay, lo que reduce costos y aumenta la flexibilidad.",
+      "Los PVC en Frame Relay establecen una ruta física fija entre el origen y el destino, similar a una línea arrendada."
+    ],
+    "respuesta": 2,
+    "explicacion": "Los PVC son conexiones lógicas permanentes dentro de la red Frame Relay, lo que permite compartir infraestructura física sin sacrificar conectividad constante."
+  },
+  {
+    "pregunta": "Determine a qué tipo de red troncal corresponde la siguiente descripción: Está formada por dos o más dispositivos conectados en cadena que utiliza un único enlace físico para transportar tráfico.",
+    "opciones": [
+      "Backbone en serie",
+      "Backbone colapsada",
+      "Backbone distribuida",
+      "Backbone paralela"
+    ],
+    "respuesta": 0,
+    "explicacion": "La backbone en serie conecta los dispositivos uno tras otro, facilitando la expansión, pero con menos tolerancia a fallos."
+  },
+  {
+    "pregunta": "Determine a qué tipo de red troncal corresponde la siguiente descripción: Es una arquitectura de red en la que se utilizan múltiples backbones independientes que funcionan para interconectar diferentes segmentos de la red.",
+    "opciones": [
+      "Backbone en serie",
+      "Backbone distribuida",
+      "Backbone paralela",
+      "Backbone colapsada"
     ],
     "respuesta": 1,
-    "explicacion": "NSFNET fue creada por la National Science Foundation en 1987 y operaba a 1.544 Mbps."
+    "explicacion": "En una backbone distribuida, varias troncales trabajan juntas para enlazar diferentes áreas, brindando mayor flexibilidad y redundancia."
   },
   {
-    "pregunta": "¿Cómo se clasifican las redes troncales?",
+    "pregunta": "¿Cuál es la principal ventaja de la multiplexación por longitud de onda (WDM) en redes de fibra óptica?",
     "opciones": [
-      "Por su velocidad",
-      "Por el tipo de cables que usan",
-      "Por capa de interconexión y topología",
-      "Por el número de usuarios"
+      "WDM permite la transmisión de múltiples señales ópticas a través de una sola fibra óptica, aumentando la capacidad de transmisión sin la necesidad de instalar nuevas fibras.",
+      "WDM incrementa la velocidad de transmisión de cada señal óptica dentro de una fibra, multiplicando el ancho de banda por cada longitud de onda.",
+      "WDM reduce la latencia en redes de fibra óptica al agrupar las señales de diferentes frecuencias en un solo canal.",
+      "WDM facilita la regeneración de señales ópticas a lo largo de grandes distancias sin la necesidad de amplificadores."
     ],
-    "respuesta": 2
+    "respuesta": 0,
+    "explicacion": "La tecnología WDM permite enviar varias longitudes de onda (canales) sobre una sola fibra, optimizando la capacidad sin necesidad de nueva infraestructura."
   },
   {
-    "pregunta": "¿Qué son las redes troncales de capa lógica?",
+    "pregunta": "¿Qué tipo de switch puede ser utilizado como core de una red troncal colapsada?",
     "opciones": [
-      "Redes que utilizan fibra óptica",
-      "Redes que operan con protocolos como Frame Relay, ATM e IP",
-      "Redes que solo funcionan con TCP",
-      "Redes satelitales"
+      "Arista 7000 Series",
+      "Cisco ASR 9000 Series",
+      "Cisco Catalyst 9500",
+      "Juniper Networks QFX Series"
     ],
-    "respuesta": 1
+    "respuesta": 2,
+    "explicacion": "El Cisco Catalyst 9500 es un switch de alto rendimiento diseñado para desempeñar funciones de núcleo (core) en redes troncales colapsadas."
   },
   {
-    "pregunta": "¿Qué son las redes troncales de capa física?",
+    "pregunta": "¿Cuál es una de las principales ventajas de utilizar Frame Relay en lugar de líneas arrendadas tradicionales en redes WAN?",
     "opciones": [
-      "Redes que transmiten datos mediante cables eléctricos",
-      "Redes que usan tecnologías como SDH/SONET, WDM, OTN, GMPLS",
-      "Redes que funcionan con conexiones Wi-Fi",
-      "Redes que operan sin cables"
+      "Frame Relay ofrece una latencia más baja que cualquier otro protocolo WAN, lo que lo convierte en la opción preferida para aplicaciones en tiempo real.",
+      "Frame Relay permite la implementación de enlaces WAN redundantes sin la necesidad de protocolos adicionales.",
+      "Frame Relay garantiza una mayor seguridad de los datos mediante la encriptación nativa en la capa de enlace de datos.",
+      "Frame Relay requiere un único circuito de acceso para conectarse a múltiples sitios dentro de la misma red del proveedor, reduciendo los costos de infraestructura."
     ],
-    "respuesta": 1
+    "respuesta": 3,
+    "explicacion": "Frame Relay usa una única conexión física para múltiples PVC, lo que simplifica la conectividad y reduce los costos de red."
   },
   {
-    "pregunta": "¿Qué característica tiene Frame Relay?",
+    "pregunta": "¿Cuál es la función del siguiente comando? R1(config-if)# standby 1 preempt",
     "opciones": [
-      "Transmite la información por medio de tramas",
-      "Converge tecnologías",
-      "Usa fibra óptica",
-      "Trabaja con señales eléctricas"
+      "Activa el balanceo de carga de acuerdo a la disponibilidad de los routers.",
+      "El router pasivo queda encargado totalmente de administrar el tráfico de la red.",
+      "El router pasivo crea una IP virtual para administrar el tráfico de la red.",
+      "El router activo se hará cargo de la función de puerta de enlace cuando vuelva a funcionar."
     ],
-    "respuesta": 0
+    "respuesta": 3,
+    "explicacion": "El comando 'standby 1 preempt' permite que el router principal recupere el rol activo en HSRP una vez que vuelva a estar disponible."
   },
   {
-    "pregunta": "¿Qué hace el protocolo Frame Relay respecto a los errores?",
+    "pregunta": "Señale una ventaja de las redes backbone paralelas.",
     "opciones": [
-      "Corrige todos los errores",
-      "Ignora la corrección de errores para ser más rápido",
-      "Duplica los datos para evitar errores",
-      "Solo detecta pero no corrige errores"
+      "Necesidad de Coordinación Avanzada",
+      "La velocidad de transmisión de datos será mayor debido a que toda la información no colapsa en un solo equipo",
+      "Requiere más enrutadores y cableado para incrementar la velocidad"
     ],
-    "respuesta": 1
-  },
-  {
-    "pregunta": "¿Qué significa ATM?",
-    "opciones": [
-      "Acceso Total de Medios",
-      "Modo de Transferencia Asincrónico",
-      "Aplicación de Transmisión Móvil",
-      "Acceso de Tráfico de Medios"
-    ],
-    "respuesta": 1
-  },
-  {
-    "pregunta": "¿Qué requiere ATM antes de enviar datos?",
-    "opciones": [
-      "Establecer una conexión",
-      "Codificar en binario",
-      "Un servidor DNS",
-      "Una IP pública"
-    ],
-    "respuesta": 0
-  },
-  {
-    "pregunta": "¿Qué hace el protocolo IP?",
-    "opciones": [
-      "Conecta redes sin usar direcciones",
-      "Funciona con conexiones dinámicas y direcciona paquetes por IP",
-      "Funciona solo con redes físicas",
-      "Administra usuarios de una red"
-    ],
-    "respuesta": 1
-  },
-  {
-    "pregunta": "¿Qué capa representa IP en el modelo TCP/IP?",
-    "opciones": [
-      "Capa de Red",
-      "Capa de Aplicación",
-      "Capa de Sesión",
-      "Capa Física"
-    ],
-    "respuesta": 0
-  },
-  {
-    "pregunta": "¿Qué característica tienen SONET y SDH?",
-    "opciones": [
-      "Funcionan con cobre",
-      "Usan señales de luz por fibra óptica",
-      "Usan señales de radio",
-      "No usan cables"
-    ],
-    "respuesta": 1
-  },
-  {
-    "pregunta": "¿Qué es WDM?",
-    "opciones": [
-      "Multiplexación por división de longitud de onda",
-      "Un tipo de cable de cobre",
-      "Un protocolo de red IP",
-      "Una técnica de compresión de datos"
-    ],
-    "respuesta": 0
-  },
-  {
-    "pregunta": "¿Qué permite OTN?",
-    "opciones": [
-      "Transmitir solo voz",
-      "Adaptarse a las nuevas tecnologías sobre IP",
-      "Conectar redes Wi-Fi",
-      "Reducir el tamaño de los paquetes"
-    ],
-    "respuesta": 1
-  },
-  {
-    "pregunta": "¿Cuál es la función principal de NGN?",
-    "opciones": [
-      "Intercambiar cables",
-      "Converger tecnologías antiguas y nuevas",
-      "Transmitir señales eléctricas únicamente",
-      "Codificar datos en XML"
-    ],
-    "respuesta": 1
+    "respuesta": 1,
+    "explicacion": "En una backbone paralela, el tráfico se distribuye en múltiples rutas, evitando cuellos de botella y mejorando el rendimiento general."
   }
 ]
