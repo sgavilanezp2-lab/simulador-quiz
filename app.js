@@ -65,6 +65,13 @@ function mostrarPregunta(){
       </div>
 
       <h2 class="text-lg font-semibold mb-3">${q.pregunta}</h2>
+      <h2 class="text-lg font-semibold mb-3">${q.pregunta}</h2>
+      ${q.imagen ? `
+  <div class="flex justify-center my-4">
+    <img src="${q.imagen}" alt="Imagen de la pregunta"
+         class="max-w-full md:max-w-2xl rounded-xl border shadow-md">
+  </div>
+` : ''}
 
       <div id="opciones" class="space-y-2"></div>
 
