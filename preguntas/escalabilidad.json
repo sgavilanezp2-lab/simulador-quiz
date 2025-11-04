@@ -163,5 +163,19 @@
     "respuesta": 0,
     "explicacion": "El valor 100 representa el costo acumulado más eficiente para alcanzar el servidor desde PC-A según la topología OSPF.",
     "imagen": "img/topologia-prioridad.png"
-  }
+  },
+{
+  "pregunta": "De acuerdo a la práctica realizada, ¿qué comando se debería ingresar para modificar la IP en S1?",
+  "opciones": [
+    "ip default-gateway 192.168.1.1",
+    "ip default-gateway 192.168.1.254",
+    "ip virtual-gateway 192.168.1.254",
+    "ip default-ip 192.168.1.1"
+  ],
+  "respuesta": 1,
+  "explicacion": "El comando correcto es 'ip default-gateway 192.168.1.254', ya que define la puerta de enlace predeterminada para el switch S1.",
+  "imagen": "imagen/topologia-modificar-ip.png"
+}
+
 ]
+
