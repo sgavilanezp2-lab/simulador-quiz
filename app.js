@@ -75,7 +75,7 @@ function mostrarPregunta(){
 
       <div id="opciones" class="space-y-2"></div>
 
-      <div id="feedback" class="mt-4 text-sm"></div>
+      <div id="feedback" class="mt-4 text-sm" style="display: none;"></div>
 
       <div class="mt-5 flex gap-2">
         <button id="btnPrev" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition"
@@ -144,6 +144,10 @@ function mostrarFeedback(ok, q){
   const box = document.getElementById('feedback');
   const correcta = q.opciones[q.respuesta];
   const exp = q.explicacion ? ` ${q.explicacion}` : '';
+  
+  // CORRECCIÓN 4: Forzar la visibilidad del elemento de feedback
+  box.style.display = 'block';
+
   if(ok){
     box.className = 'mt-3 text-sm rounded border bg-green-50 border-green-200 text-green-800 px-3 py-2';
     box.textContent = '✅ ¡Correcto!' + exp;
@@ -154,7 +158,7 @@ function mostrarFeedback(ok, q){
 }
 
 function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
-  // CORRECCIÓN 3: Cambiado el selector a '.opt'
+  // CORRECCIÓN 5: Cambiado el selector a '.opt'
   document.querySelectorAll('#opciones .opt').forEach((b,i)=>{
     b.disabled = true;
     b.classList.add('disabled:opacity-80');
