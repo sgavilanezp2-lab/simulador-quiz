@@ -10,24 +10,33 @@
     tailwind.config = { darkMode: 'class' };
   </script>
 
-  <!-- Firebase -->
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
-    .img-pregunta { width: 100%; max-width: 48rem; margin: 1rem auto; border-radius: 0.75rem; border: 1px solid #ddd; }
-    .card { background: rgba(255,255,255,0.8); backdrop-filter: blur(6px); border-radius: 1rem; border: 1px solid #ddd; }
-    .btn { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem 1rem; border-radius: .75rem; border: 1px solid #ccc; }
-    .btn-primary { background: #4f46e5; color: white; border-color: #4f46e5; }
-    .btn-primary:hover { background: #4338ca; }
-    .btn-ghost:hover { background: #f3f4f6; }
-    .pill { font-size: .75rem; padding: .25rem .75rem; border-radius: 9999px; background: #f3f4f6; border: 1px solid #ddd; }
-    .opt { width: 100%; text-align: left; padding: .75rem; border-radius: .75rem; border: 1px solid #ddd; background: white; }
+    .img-pregunta { @apply w-full max-w-3xl mx-auto rounded-xl border shadow-md my-4; }
+    .card { @apply bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100; }
+    .btn { @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm transition hover:-translate-y-0.5 active:translate-y-0; }
+    .btn-primary { @apply bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700; }
+    .btn-ghost { @apply bg-white hover:bg-gray-50; }
+    .pill { @apply text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border; }
+    .opt { @apply w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition; }
+    .opt[disabled] { @apply opacity-90; }
+    .ring-ok { @apply ring-2 ring-green-300; }
+    .ring-sel { @apply ring-2 ring-indigo-300; }
+    .dark body { @apply bg-slate-950 text-slate-100; }
+    .dark .card { @apply bg-slate-900/70 border-slate-800; }
+    .dark .btn-ghost { @apply bg-slate-900 hover:bg-slate-800 border-slate-700; }
+    .dark .pill { @apply bg-slate-800 text-slate-200 border-slate-700; }
+    .dark .opt { @apply bg-slate-900 border-slate-700 hover:bg-slate-800; }
   </style>
 </head>
+
 <body class="min-h-full bg-gradient-to-b from-slate-50 to-slate-100">
 
+<!-- HEADER -->
 <header class="sticky top-0 z-10 bg-white/70 backdrop-blur border-b">
   <div class="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
     <div class="text-2xl">🧠</div>
@@ -37,24 +46,25 @@
       <button id="btnPerfil" class="btn btn-ghost hidden">Perfil</button>
       <span id="userInfo" class="hidden sm:inline text-sm text-gray-600"></span>
       <button id="btnLogout" class="btn btn-ghost hidden">Salir</button>
-      <button id="toggleDark" class="btn btn-ghost">🌙</button>
+      <button id="toggleDark" class="btn btn-ghost" title="Modo oscuro">🌙</button>
     </div>
   </div>
 </header>
 
-<!-- LOGIN -->
+<!-- PANEL LOGIN -->
 <section id="authPanel" class="max-w-md mx-auto mt-6 card p-6">
   <h2 class="text-lg font-semibold mb-3">Iniciar Sesión</h2>
 
   <input id="email" type="email" placeholder="Correo" class="w-full border rounded-xl px-3 py-2 mb-2">
   <input id="password" type="password" placeholder="Contraseña" class="w-full border rounded-xl px-3 py-2 mb-2">
+
   <p id="authMsg" class="text-red-600 text-sm mb-2"></p>
 
   <div class="flex flex-col gap-2">
     <button id="btnLogin" class="btn btn-primary w-full">Entrar</button>
     <button id="btnRegistro" class="btn btn-ghost w-full">Registrarse</button>
 
-    <!-- Google Login -->
+    <!-- BOTÓN GOOGLE -->
     <button id="btnGoogle" class="btn btn-ghost border w-full">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
       Iniciar sesión con Google
@@ -62,12 +72,12 @@
   </div>
 </section>
 
-<!-- APP -->
+<!-- PANEL APP -->
 <section id="appPanel" class="max-w-5xl mx-auto p-4 hidden">
   <section class="card p-3">
 
       <div class="flex flex-wrap gap-2 items-center">
-        <span class="pill font-semibold">📚 Escalabilidad de redes</span>
+        <span class="pill font-semibold text-sm">📚 Escalabilidad de redes</span>
 
         <select id="modo" class="border rounded-xl px-3 py-1.5 text-sm">
           <option value="examen">Examen (30 Preguntas)</option>
@@ -89,7 +99,7 @@
       <div class="flex flex-wrap gap-2 mt-2">
         <button id="btnEmpezar" class="btn btn-primary">Empezar</button>
         <button id="btnGuardar" class="btn btn-ghost">Guardar</button>
-        <button id="btnCargar" class="btn btn-ghost">Cargar</button>
+        <button id="btnCargar"  class="btn btn-ghost">Cargar</button>
       </div>
 
       <div id="estado" class="mt-2 p-3 rounded-xl border bg-white/60 text-sm">
@@ -100,7 +110,7 @@
   </section>
 </section>
 
-<!-- PERFIL -->
+<!-- PANEL PERFIL -->
 <section id="perfilPanel" class="max-w-4xl mx-auto p-4 hidden">
   <div class="card p-4">
 
@@ -110,20 +120,9 @@
     <p><b>Miembro desde:</b> <span id="pfFecha"></span></p>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-      <div class="card p-3">
-        <h3 class="font-semibold">Mejor Puntuación</h3>
-        <p id="pfMejor" class="text-xl font-bold"></p>
-      </div>
-
-      <div class="card p-3">
-        <h3 class="font-semibold">Exámenes Realizados</h3>
-        <p id="pfExamenes" class="text-xl font-bold"></p>
-      </div>
-
-      <div class="card p-3">
-        <h3 class="font-semibold">Tiempo Estudiado</h3>
-        <p id="pfTiempo" class="text-xl font-bold"></p>
-      </div>
+      <div class="card p-3"><h3 class="font-semibold">Mejor Puntuación</h3><p id="pfMejor" class="text-xl font-bold"></p></div>
+      <div class="card p-3"><h3 class="font-semibold">Exámenes Realizados</h3><p id="pfExamenes" class="text-xl font-bold"></p></div>
+      <div class="card p-3"><h3 class="font-semibold">Tiempo Estudiado</h3><p id="pfTiempo" class="text-xl font-bold"></p></div>
     </div>
 
     <h3 class="font-semibold mt-4 mb-2">Historial</h3>
@@ -133,41 +132,69 @@
   </div>
 </section>
 
-<!-- ---------------- FIREBASE + GOOGLE AUTH ---------------- -->
-
-<script>
-/* 🔥 TU CONFIGURACIÓN DE FIREBASE AQUÍ */
-const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_BUCKET",
-  messagingSenderId: "TU_SENDER",
-  appId: "TU_APP_ID"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-/* ---------------- GOOGLE LOGIN ---------------- */
-document.getElementById("btnGoogle").addEventListener("click", async () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    await auth.signInWithPopup(provider);
-  } catch (err) {
-    document.getElementById("authMsg").textContent = err.message;
-  }
-});
-</script>
-
-<!-- ---------------- APP ---------------- -->
+<!-- APP JS (TU ARCHIVO CORREGIDO) -->
 <script src="app.js?v=11"></script>
 
+<!-- FIREBASE INIT + AUTH (CORREGIDO) -->
 <script>
-document.getElementById("toggleDark").addEventListener("click", () => {
-  document.documentElement.classList.toggle("dark");
-});
+  const firebaseConfig = {
+    apiKey: "AIzaSyBU1oaDdq6qD4fTiLN41SAeQg6Kp06gDXk",
+    authDomain: "simulador-tics.firebaseapp.com",
+    projectId: "simulador-tics",
+    storageBucket: "simulador-tics.appspot.com",
+    messagingSenderId: "501091859008",
+    appId: "1:501091859008:web:80e4596d2adcb5adbf7da5",
+    measurementId: "G-5LFLE4MBPH"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+</script>
+
+<!-- AUTH.JS INTEGRADO -->
+<script>
+  const authPanel=document.getElementById('authPanel');
+  const appPanel=document.getElementById('appPanel');
+  const email=document.getElementById('email');
+  const password=document.getElementById('password');
+  const msg=document.getElementById('authMsg');
+  const userInfo=document.getElementById('userInfo');
+  const btnLogin=document.getElementById('btnLogin');
+  const btnRegistro=document.getElementById('btnRegistro');
+  const btnGoogle=document.getElementById('btnGoogle');
+  const btnLogout=document.getElementById('btnLogout');
+
+  btnLogin.onclick=()=>auth.signInWithEmailAndPassword(email.value,password.value)
+    .catch(e=>msg.textContent=e.message);
+
+  btnRegistro.onclick=()=>auth.createUserWithEmailAndPassword(email.value,password.value)
+    .catch(e=>msg.textContent=e.message);
+
+  btnGoogle.onclick=()=>auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(e=>msg.textContent=e.message);
+
+  btnLogout.onclick=()=>auth.signOut();
+
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      authPanel.classList.add('hidden');
+      appPanel.classList.remove('hidden');
+      btnLogout.classList.remove('hidden');
+      userInfo.textContent=user.email;
+    } else {
+      authPanel.classList.remove('hidden');
+      appPanel.classList.add('hidden');
+      btnLogout.classList.add('hidden');
+      userInfo.textContent='';
+    }
+  });
+</script>
+
+<script>
+  document.getElementById('toggleDark')?.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+  });
 </script>
 
 </body>
