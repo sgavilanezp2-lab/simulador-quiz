@@ -6,19 +6,17 @@
 
 // Materia Fija y configuración
 const MATERIA_URL = 'preguntas/escalabilidad.json';
-const CANTIDAD_EXAMEN = 30; // Límite para el modo examen
-const MATERIA_NOMBRE = 'escalabilidad'; // Nuevo: Valor fijo para guardar en local
+const CANTIDAD_EXAMEN = 30;
+const MATERIA_NOMBRE = 'escalabilidad';
 
 const estado = document.getElementById('estado');
 const contenedor = document.getElementById('contenedor');
 const timerEl = document.getElementById('timer');
 
 const btnEmpezar = document.getElementById('btnEmpezar');
-// REINTRODUCIDOS: referencias a los botones de Guardar/Cargar
 const btnGuardar = document.getElementById('btnGuardar'); 
 const btnCargar = document.getElementById('btnCargar'); 
 
-// SE ELIMINÓ materiaSel. Solo usamos los selectores que quedan.
 const modoSel = document.getElementById('modo');
 const minutosSel = document.getElementById('minutos');
 
@@ -42,7 +40,7 @@ async function cargarMateria(){
   return data;
 }
 
-// --- Render y Lógica Principal ---
+// --- Lógica y Render ---
 
 function iniciarTimer(){
   clearInterval(interval);
@@ -92,9 +90,7 @@ function mostrarPregunta(){
     </div>
   `;
 
-  // Opciones con mejor estilo visual
   const wrap = document.getElementById('opciones');
-  // CORRECCIÓN 1: Cambiado 'opcion' a 'opt' para coincidir con el CSS.
   wrap.innerHTML = q.opciones.map((op,i)=>`
     <button
       class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition"
@@ -103,8 +99,6 @@ function mostrarPregunta(){
     </button>
   `).join('');
 
-  // Listeners
-  // CORRECCIÓN 2: Cambiado el selector a '.opt'
   wrap.querySelectorAll('.opt').forEach(btn=>{
     btn.addEventListener('click', () => responder(parseInt(btn.dataset.i,10)));
   });
@@ -112,7 +106,6 @@ function mostrarPregunta(){
   document.getElementById('btnNext').onclick = () => { if (idx<ronda.length-1) { idx++; mostrarPregunta(); } else { finalizar(false); } };
   document.getElementById('btnFin').onclick  = () => finalizar(false);
 
-  // Si ya había respuesta, refléjala
   if (respuestas[idx] != null){
     deshabilitarOpciones(q.respuesta, respuestas[idx], modoSel.value==='examen');
     if (modoSel.value==='estudio'){
@@ -123,9 +116,9 @@ function mostrarPregunta(){
 
 function responder(iElegido){
   const q = ronda[idx];
-  // si el usuario cambia de opción en estudio, ajustamos el conteo
+
   if (modoSel.value === 'estudio' && respuestas[idx] !== undefined) {
-    if (respuestas[idx] === q.respuesta) correctas--; // quitamos la anterior si era correcta
+    if (respuestas[idx] === q.respuesta) correctas--;
   }
   respuestas[idx] = iElegido;
 
@@ -135,7 +128,6 @@ function responder(iElegido){
     mostrarFeedback(ok, q);
     deshabilitarOpciones(q.respuesta, iElegido, false);
   } else {
-    // examen: solo marcar la opción elegida, sin decir si es correcta
     deshabilitarOpciones(null, iElegido, true);
   }
 }
@@ -144,8 +136,7 @@ function mostrarFeedback(ok, q){
   const box = document.getElementById('feedback');
   const correcta = q.opciones[q.respuesta];
   const exp = q.explicacion ? ` ${q.explicacion}` : '';
-  
-  // Aplicamos las clases para que el elemento sea visible y tenga estilo
+
   if(ok){
     box.className = 'mt-3 text-sm rounded border bg-green-50 border-green-200 text-green-800 px-3 py-2';
     box.textContent = '✅ ¡Correcto!' + exp;
@@ -156,11 +147,10 @@ function mostrarFeedback(ok, q){
 }
 
 function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
-  // CORRECCIÓN 3: Cambiado el selector a '.opt'
   document.querySelectorAll('#opciones .opt').forEach((b,i)=>{
     b.disabled = true;
     b.classList.add('disabled:opacity-80');
-    // Marca visual: correcta en verde, elegida con aro indigo
+
     if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) {
       b.classList.add('ring-2','ring-green-300');
     }
@@ -184,7 +174,6 @@ async function finalizar(porTiempo){
   contenedor.innerHTML = '';
 }
 
-// --- Botones principales ---
 btnEmpezar.onclick = async () => {
   try{
     btnEmpezar.disabled = true;
@@ -210,11 +199,9 @@ btnEmpezar.onclick = async () => {
   }
 };
 
-// --- Guardar/Cargar progreso local ---
 const STORAGE_KEY = 'simulador_quiz_estado_v1';
 
 btnGuardar && (btnGuardar.onclick = ()=>{
-    // Se usa la variable MATERIA_NOMBRE fija
   const data = { materia: MATERIA_NOMBRE, modo: modoSel.value, minutos: minutosSel.value, ronda, idx, correctas, respuestas };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   alert('✅ Progreso guardado en este dispositivo.');
@@ -225,8 +212,7 @@ btnCargar && (btnCargar.onclick = ()=>{
   if(!raw) return alert('No hay progreso guardado.');
   try{
     const d = JSON.parse(raw);
-    
-    // Verificación de materia
+
     if (d.materia !== MATERIA_NOMBRE) {
         return alert(`El progreso guardado es de la materia "${d.materia}". Solo se admite "Escalabilidad de redes".`);
     }
