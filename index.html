@@ -6,9 +6,7 @@
   <title>Simulador de Preguntas - Escalabilidad</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' };
-  </script>
+  <script> tailwind.config = { darkMode: 'class' }; </script>
 
   <style>
     .img-pregunta { @apply w-full max-w-3xl mx-auto rounded-xl border shadow-md my-4; }
@@ -27,13 +25,15 @@
     .dark .btn-ghost { @apply bg-slate-900 hover:bg-slate-800 border-slate-700; }
     .dark .pill { @apply bg-slate-800 text-slate-200 border-slate-700; }
     .dark .opt { @apply bg-slate-900 border-slate-700 hover:bg-slate-800; }
+
+    /* pequeño ajuste para paneles de perfil/historial */
+    .small-muted { @apply text-sm text-gray-600; }
   </style>
 
-  <!-- Firebase -->
+  <!-- Firebase (v8) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
 </head>
 
 <body class="min-h-full bg-gradient-to-b from-slate-50 to-slate-100">
@@ -51,128 +51,570 @@
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto p-2 md:p-4 space-y-3">
+  <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-4">
 
-    <!-- PANEL DE AUTENTICACIÓN -->
-    <section id="authPanel" class="card p-4">
-      <h2 class="font-semibold text-lg mb-2">Iniciar sesión</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      <input id="email" type="email" placeholder="Correo" class="border p-2 rounded w-full mb-2">
-      <input id="password" type="password" placeholder="Contraseña" class="border p-2 rounded w-full mb-2">
+      <!-- AUTENTICACIÓN -->
+      <section id="authPanel" class="card p-4 lg:col-span-1">
+        <h2 class="font-semibold text-lg mb-2">Iniciar sesión</h2>
 
-      <div class="flex gap-2 mt-2">
-        <button id="btnLogin" class="btn btn-primary">Entrar</button>
-        <button id="btnRegistro" class="btn btn-ghost">Crear cuenta</button>
-        <button id="btnGoogle" class="btn btn-ghost">Google</button>
-      </div>
+        <input id="email" type="email" placeholder="Correo" class="border p-2 rounded w-full mb-2" />
+        <input id="password" type="password" placeholder="Contraseña" class="border p-2 rounded w-full mb-2" />
 
-      <p id="authMsg" class="text-red-600 text-sm mt-2"></p>
-    </section>
-
-    <!-- PANEL DE LA APP -->
-    <section id="appPanel" class="card p-3 hidden">
-
-      <div class="flex flex-wrap gap-2 items-center">
-        <span class="pill font-semibold text-sm">📚 Escalabilidad de redes</span>
-
-        <select id="modo" class="border rounded-xl px-3 py-1.5 text-sm">
-          <option value="examen">Examen (30 Preguntas)</option>
-          <option value="estudio">Estudio (Todas las Preguntas)</option>
-        </select>
-
-        <select id="minutos" class="border rounded-xl px-3 py-1.5 text-sm">
-          <option value="60">60 min</option>
-          <option value="30">30 min</option>
-          <option value="15">15 min</option>
-          <option value="0">Sin tiempo</option>
-        </select>
-
-        <div class="ml-auto flex items-center gap-1">
-          <span class="pill text-sm">⏱ <span id="timer">--:--</span></span>
+        <div class="flex gap-2 mt-2">
+          <button id="btnLogin" class="btn btn-primary">Entrar</button>
+          <button id="btnRegistro" class="btn btn-ghost">Crear cuenta</button>
         </div>
-      </div>
 
-      <div class="flex flex-wrap gap-2 mt-2">
-        <button id="btnEmpezar" class="btn btn-primary">Empezar</button>
-        <button id="btnGuardar" class="btn btn-ghost">Guardar</button>
-        <button id="btnCargar" class="btn btn-ghost">Cargar</button>
-      </div>
+        <div class="flex gap-2 mt-2">
+          <button id="btnGoogle" class="btn btn-ghost">Entrar con Google</button>
+        </div>
 
-      <div id="estado" class="mt-2 p-3 rounded-xl border bg-white/60 text-sm">
-        Selecciona el modo de estudio/examen y presiona <b>Empezar</b>.
-      </div>
+        <p id="authMsg" class="text-red-600 text-sm mt-2"></p>
+        <hr class="my-3" />
+        <div class="small-muted">¿No tienes cuenta? Crea una con correo/contraseña o usa Google.</div>
+      </section>
 
-      <div id="contenedor" class="mt-2"></div>
-    </section>
+      <!-- PERFIL + HISTORIAL -->
+      <aside class="space-y-4 lg:col-span-1">
 
+        <!-- Perfil -->
+        <section id="profilePanel" class="card p-4 hidden">
+          <h3 class="font-semibold">Perfil</h3>
+          <div class="mt-2">
+            <div class="text-sm text-gray-700">Correo: <span id="profileEmail" class="font-medium"></span></div>
+            <div class="text-sm text-gray-700">Creado: <span id="profileCreated" class="font-medium"></span></div>
+            <div class="text-sm text-gray-700">Exámenes: <span id="profileCount" class="font-medium">0</span></div>
+            <div class="text-sm text-gray-700">Mejor puntaje: <span id="profileBest" class="font-medium">—</span></div>
+            <div class="text-sm text-gray-700">Tiempo total: <span id="profileTime" class="font-medium">—</span></div>
+          </div>
+
+          <div class="mt-3 flex gap-2">
+            <button id="btnRefreshProfile" class="btn btn-ghost">Actualizar</button>
+            <button id="btnExportAll" class="btn btn-ghost">Exportar historial (JSON)</button>
+          </div>
+        </section>
+
+        <!-- Historial -->
+        <section id="historyPanel" class="card p-4 hidden">
+          <h3 class="font-semibold">Historial</h3>
+          <div id="historyList" class="mt-2 space-y-2 max-h-64 overflow-auto"></div>
+          <div class="mt-3">
+            <button id="btnLoadProgress" class="btn btn-ghost">Cargar progreso guardado</button>
+            <button id="btnDeleteProgress" class="btn btn-ghost">Borrar progreso guardado</button>
+          </div>
+        </section>
+
+      </aside>
+
+      <!-- APP PANEL (SIMULADOR) -->
+      <section id="appPanel" class="card p-4 lg:col-span-1 hidden">
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="pill font-semibold text-sm">📚 Escalabilidad de redes</span>
+
+          <select id="modo" class="border rounded-xl px-3 py-1.5 text-sm">
+            <option value="examen">Examen (30 Preguntas)</option>
+            <option value="estudio">Estudio (Todas las Preguntas)</option>
+          </select>
+
+          <select id="minutos" class="border rounded-xl px-3 py-1.5 text-sm">
+            <option value="60">60 min</option>
+            <option value="30">30 min</option>
+            <option value="15">15 min</option>
+            <option value="0">Sin tiempo</option>
+          </select>
+
+          <div class="ml-auto flex items-center gap-1">
+            <span class="pill text-sm">⏱ <span id="timer">--:--</span></span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mt-2">
+          <button id="btnEmpezar" class="btn btn-primary">Empezar</button>
+          <button id="btnGuardar" class="btn btn-ghost">Guardar Progreso</button>
+          <button id="btnCargar" class="btn btn-ghost">Cargar Progreso</button>
+        </div>
+
+        <div id="estado" class="mt-2 p-3 rounded-xl border bg-white/60 text-sm">
+          Selecciona el modo de estudio/examen y presiona <b>Empezar</b>.
+        </div>
+
+        <div id="contenedor" class="mt-2"></div>
+      </section>
+
+    </div>
   </main>
 
+  <!-- SIMULADOR + AUTH LOGIC (Inline JS) -->
   <script>
-    // ---------- FIREBASE ----------
-    const firebaseConfig = {
-      apiKey: "AIzaSyBU1oaDdq6qD4fTiLN41SAeQg6Kp06gDXk",
-      authDomain: "simulador-tics.firebaseapp.com",
-      projectId: "simulador-tics",
-      storageBucket: "simulador-tics.firebasestorage.app",
-      messagingSenderId: "501091859008",
-      appId: "1:501091859008:web:80e4596d2adcb5adbf7da5",
-      measurementId: "G-5LFLE4MBPH"
-    };
+  // ---------------- FIREBASE CONFIG ----------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBU1oaDdq6qD4fTiLN41SAeQg6Kp06gDXk",
+    authDomain: "simulador-tics.firebaseapp.com",
+    projectId: "simulador-tics",
+    storageBucket: "simulador-tics.firebasestorage.app",
+    messagingSenderId: "501091859008",
+    appId: "1:501091859008:web:80e4596d2adcb5adbf7da5",
+    measurementId: "G-5LFLE4MBPH"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+  // ---------------- ELEMENTOS ----------------
+  const authPanel = document.getElementById('authPanel');
+  const appPanel = document.getElementById('appPanel');
+  const profilePanel = document.getElementById('profilePanel');
+  const historyPanel = document.getElementById('historyPanel');
 
-    // ELEMENTOS
-    const authPanel = document.getElementById('authPanel');
-    const appPanel = document.getElementById('appPanel');
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const msg = document.getElementById('authMsg');
-    const userInfo = document.getElementById('userInfo');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnRegistro = document.getElementById('btnRegistro');
-    const btnGoogle = document.getElementById('btnGoogle');
-    const btnLogout = document.getElementById('btnLogout');
+  const email = document.getElementById('email');
+  const password = document.getElementById('password');
+  const authMsg = document.getElementById('authMsg');
+  const userInfo = document.getElementById('userInfo');
 
-    // LOGIN
-    btnLogin.onclick = () =>
-      auth.signInWithEmailAndPassword(email.value, password.value)
-        .catch(e => msg.textContent = e.message);
+  const btnLogin = document.getElementById('btnLogin');
+  const btnRegistro = document.getElementById('btnRegistro');
+  const btnGoogle = document.getElementById('btnGoogle');
+  const btnLogout = document.getElementById('btnLogout');
 
-    btnRegistro.onclick = () =>
-      auth.createUserWithEmailAndPassword(email.value, password.value)
-        .catch(e => msg.textContent = e.message);
+  const btnEmpezar = document.getElementById('btnEmpezar');
+  const btnGuardar = document.getElementById('btnGuardar');
+  const btnCargar = document.getElementById('btnCargar');
 
-    btnGoogle.onclick = () =>
-      auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-        .catch(e => msg.textContent = e.message);
+  const btnRefreshProfile = document.getElementById('btnRefreshProfile');
+  const btnExportAll = document.getElementById('btnExportAll');
+  const btnLoadProgress = document.getElementById('btnLoadProgress');
+  const btnDeleteProgress = document.getElementById('btnDeleteProgress');
 
-    btnLogout.onclick = () => auth.signOut();
+  const profileEmail = document.getElementById('profileEmail');
+  const profileCreated = document.getElementById('profileCreated');
+  const profileCount = document.getElementById('profileCount');
+  const profileBest = document.getElementById('profileBest');
+  const profileTime = document.getElementById('profileTime');
+  const historyList = document.getElementById('historyList');
 
-    // CAMBIO DE USUARIO
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        authPanel.classList.add('hidden');
-        appPanel.classList.remove('hidden');
-        btnLogout.classList.remove('hidden');
-        userInfo.textContent = user.email;
-      } else {
-        authPanel.classList.remove('hidden');
-        appPanel.classList.add('hidden');
-        btnLogout.classList.add('hidden');
-        userInfo.textContent = '';
+  const estado = document.getElementById('estado');
+  const contenedor = document.getElementById('contenedor');
+  const timerEl = document.getElementById('timer');
+  const modoSel = document.getElementById('modo');
+  const minutosSel = document.getElementById('minutos');
+
+  // ---------------- CONFIG Y ESTADO DEL SIMULADOR ----------------
+  const MATERIA_URL = 'preguntas/escalabilidad.json';
+  const CANTIDAD_EXAMEN = 30;
+  const MATERIA_NOMBRE = 'escalabilidad';
+
+  let banco = [];
+  let ronda = [];
+  let idx = 0;
+  let correctas = 0;
+  let respuestas = [];
+  let interval = null;
+  let startedAt = null; // timestamp inicio
+  let currentUser = null;
+
+  // ---------------- UTILS ----------------
+  function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
+  function sample(a,n){ return shuffle(a).slice(0, Math.min(n, a.length)); }
+  function fmt(seg){ const m=Math.floor(seg/60).toString().padStart(2,'0'); const s=(seg%60).toString().padStart(2,'0'); return `${m}:${s}`; }
+
+  async function cargarMateria(){
+    const res = await fetch(MATERIA_URL);
+    if(!res.ok) throw new Error('No pude cargar el banco de preguntas de Escalabilidad');
+    const data = await res.json();
+    if(!Array.isArray(data)) throw new Error('El JSON de preguntas debe ser un arreglo');
+    return data;
+  }
+
+  // ---------------- RENDER / LÓGICA ----------------
+  function iniciarTimer(){
+    clearInterval(interval);
+    let seg = parseInt(minutosSel.value,10)*60;
+    if (seg <= 0){ timerEl.textContent = 'Sin tiempo'; return; }
+    timerEl.textContent = fmt(seg);
+    interval = setInterval(()=>{
+      seg--; timerEl.textContent = fmt(seg);
+      if(seg<=0){ clearInterval(interval); finalizar(true); }
+    },1000);
+  }
+
+  function mostrarPregunta(){
+    if (idx >= ronda.length) { finalizar(false); return; }
+    const q = ronda[idx];
+
+    contenedor.innerHTML = `
+      <div class="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100 p-5">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border">Pregunta ${idx+1} / ${ronda.length}</span>
+        </div>
+
+        <h2 class="text-lg font-semibold mb-3">${q.pregunta}</h2>
+        ${q.imagen ? `
+    <div class="flex justify-center my-4">
+      <img src="${q.imagen}" alt="Imagen de la pregunta"
+            class="max-w-full md:max-w-2xl rounded-xl border shadow-md">
+    </div>
+  ` : ''}
+
+        <div id="opciones" class="space-y-2"></div>
+
+        <div id="feedback" class="mt-4 text-sm"></div>
+
+        <div class="mt-5 flex gap-2">
+          <button id="btnPrev" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition"
+                  ${idx===0 ? "disabled" : ""}>Anterior</button>
+
+          <button id="btnNext" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition">
+            Siguiente
+          </button>
+
+          <button id="btnFin" class="ml-auto px-4 py-2 rounded-xl border bg-indigo-600 text-white hover:bg-indigo-700 transition">
+            Finalizar
+          </button>
+        </div>
+      </div>
+    `;
+
+    const wrap = document.getElementById('opciones');
+    wrap.innerHTML = q.opciones.map((op,i)=>`
+      <button
+        class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition"
+        data-i="${i}">
+        ${op}
+      </button>
+    `).join('');
+
+    wrap.querySelectorAll('.opt').forEach(btn=>{
+      btn.addEventListener('click', () => responder(parseInt(btn.dataset.i,10)));
+    });
+    document.getElementById('btnPrev').onclick = () => { if (idx>0) { idx--; mostrarPregunta(); } };
+    document.getElementById('btnNext').onclick = () => { if (idx<ronda.length-1) { idx++; mostrarPregunta(); } else { finalizar(false); } };
+    document.getElementById('btnFin').onclick  = () => finalizar(false);
+
+    if (respuestas[idx] != null){
+      deshabilitarOpciones(q.respuesta, respuestas[idx], modoSel.value==='examen');
+      if (modoSel.value==='estudio'){
+        mostrarFeedback(respuestas[idx]===q.respuesta, q);
+      }
+    }
+  }
+
+  function responder(iElegido){
+    const q = ronda[idx];
+    if (modoSel.value === 'estudio' && respuestas[idx] !== undefined) {
+      if (respuestas[idx] === q.respuesta) correctas--;
+    }
+    respuestas[idx] = iElegido;
+
+    if (modoSel.value === 'estudio'){
+      const ok = iElegido === q.respuesta;
+      if (ok) correctas++;
+      mostrarFeedback(ok, q);
+      deshabilitarOpciones(q.respuesta, iElegido, false);
+    } else {
+      deshabilitarOpciones(null, iElegido, true);
+    }
+  }
+
+  function mostrarFeedback(ok, q){
+    const box = document.getElementById('feedback');
+    const correcta = q.opciones[q.respuesta];
+    const exp = q.explicacion ? ` ${q.explicacion}` : '';
+    if(ok){
+      box.className = 'mt-3 text-sm rounded border bg-green-50 border-green-200 text-green-800 px-3 py-2';
+      box.textContent = '✅ ¡Correcto!' + exp;
+    }else{
+      box.className = 'mt-3 text-sm rounded border bg-red-50 border-red-200 text-red-800 px-3 py-2';
+      box.textContent = `❌ Incorrecto. Respuesta correcta: "${correcta}".` + exp;
+    }
+  }
+
+  function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
+    document.querySelectorAll('#opciones .opt').forEach((b,i)=>{
+      b.disabled = true;
+      if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) {
+        b.classList.add('ring-ok');
+      }
+      if (i===indiceElegida) {
+        b.classList.add('ring-sel');
       }
     });
+  }
 
-    // DARK MODE
-    document.getElementById('toggleDark')
-      .addEventListener('click', () =>
-        document.documentElement.classList.toggle('dark')
-      );
+  async function finalizar(porTiempo){
+    clearInterval(interval);
+    let total;
+    if (modoSel.value === 'examen'){
+      total = respuestas.reduce((acc, r, i)=> acc + (r===ronda[i].respuesta ? 1 : 0), 0);
+    } else {
+      total = correctas;
+    }
+
+    estado.textContent = (porTiempo ? '⏰ Se acabó el tiempo. ' : '🏁 Finalizado. ') + `Puntaje: ${total}/${ronda.length}`;
+    contenedor.innerHTML = '';
+
+    // Guardar resultado en Firestore si hay usuario
+    if (currentUser){
+      const duracionSeg = startedAt ? Math.floor((Date.now()-startedAt)/1000) : null;
+      const resultado = {
+        materia: MATERIA_NOMBRE,
+        modo: modoSel.value,
+        minutosConfigurados: parseInt(minutosSel.value,10),
+        fecha: firebase.firestore.FieldValue.serverTimestamp(),
+        puntaje: total,
+        total: ronda.length,
+        duracionSeg,
+        respuestas,
+        ronda: ronda.map(q=>({pregunta:q.pregunta, opciones:q.opciones, respuesta:q.respuesta})), // guardamos texto, no imágenes pesadas
+      };
+
+      try{
+        await db.collection('users').doc(currentUser.uid).collection('examenes').add(resultado);
+        // actualizar perfil (cliente) para reflejar cambios
+        await refreshProfile();
+        estado.textContent += ' — Resultado guardado en tu historial.';
+      }catch(e){
+        console.error('Error guardando resultado:', e);
+      }
+    }
+  }
+
+  // ------------------ BOTONES PRINCIPALES ------------------
+  document.getElementById('btnEmpezar').onclick = async () => {
+    try{
+      btnEmpezar.disabled = true;
+      estado.textContent = `Cargando preguntas de ${MATERIA_NOMBRE}...`;
+      contenedor.innerHTML = '';
+      correctas = 0; respuestas = []; idx = 0;
+      banco = await cargarMateria();
+
+      if (modoSel.value === 'examen') {
+          ronda = sample(banco, CANTIDAD_EXAMEN);
+      } else {
+          ronda = shuffle(banco);
+      }
+
+      startedAt = Date.now();
+      estado.textContent = `Materia: Escalabilidad de redes — Preguntas seleccionadas: ${ronda.length}`;
+      mostrarPregunta();
+      iniciarTimer();
+    }catch(e){
+      estado.textContent = 'Error al iniciar el simulador: ' + e.message;
+    }finally{
+      btnEmpezar.disabled = false;
+    }
+  };
+
+  // ------------------ GUARDAR/CARGAR PROGRESO (Firestore) ------------------
+  async function saveProgressToFirestore(){
+    if(!currentUser) return alert('Inicia sesión para guardar el progreso.');
+    const data = {
+      materia: MATERIA_NOMBRE,
+      modo: modoSel.value,
+      minutos: minutosSel.value,
+      ronda,
+      idx,
+      correctas,
+      respuestas,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try{
+      await db.collection('users').doc(currentUser.uid).collection('meta').doc('progress').set(data);
+      alert('✅ Progreso guardado en tu cuenta.');
+    }catch(e){
+      console.error(e); alert('No se pudo guardar el progreso.');
+    }
+  }
+
+  async function loadProgressFromFirestore(){
+    if(!currentUser) return alert('Inicia sesión para cargar el progreso.');
+    try{
+      const doc = await db.collection('users').doc(currentUser.uid).collection('meta').doc('progress').get();
+      if(!doc.exists) return alert('No hay progreso guardado en la cuenta.');
+      const d = doc.data();
+      // validar materia
+      if (d.materia !== MATERIA_NOMBRE) return alert(`El progreso guardado es de "${d.materia}" y no coincide.`);
+      modoSel.value = d.modo;
+      minutosSel.value = d.minutos;
+      ronda = d.ronda || [];
+      idx = d.idx || 0;
+      correctas = d.correctas || 0;
+      respuestas = d.respuestas || [];
+      estado.textContent = `Progreso cargado. Materia: ${MATERIA_NOMBRE} — Preguntas: ${ronda.length}`;
+      mostrarPregunta(); iniciarTimer();
+    }catch(e){
+      console.error(e); alert('No pude cargar el progreso.'); 
+    }
+  }
+
+  btnGuardar && (btnGuardar.onclick = saveProgressToFirestore);
+  btnCargar && (btnCargar.onclick = loadProgressFromFirestore);
+
+  // ------------------ AUTH ------------------
+  btnLogin.onclick = ()=> auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>authMsg.textContent=e.message);
+  btnRegistro.onclick = ()=> auth.createUserWithEmailAndPassword(email.value,password.value).catch(e=>authMsg.textContent=e.message);
+  btnGoogle.onclick = ()=> auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e=>authMsg.textContent=e.message);
+  btnLogout.onclick = ()=> auth.signOut();
+
+  // ------------------ PROFILE & HISTORY ------------------
+  async function ensureUserDoc(user){
+    const uDoc = db.collection('users').doc(user.uid);
+    const snap = await uDoc.get();
+    if(!snap.exists){
+      await uDoc.set({ email: user.email, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } else {
+      // ensure email stored/updated
+      await uDoc.set({ email: user.email }, { merge: true });
+    }
+  }
+
+  async function refreshProfile(){
+    if(!currentUser) return;
+    profilePanel.classList.remove('hidden');
+    historyPanel.classList.remove('hidden');
+
+    profileEmail.textContent = currentUser.email || '';
+    // fetch user doc
+    const uDoc = await db.collection('users').doc(currentUser.uid).get();
+    const udata = uDoc.exists ? uDoc.data() : {};
+    if (udata.createdAt && udata.createdAt.toDate){
+      profileCreated.textContent = udata.createdAt.toDate().toLocaleString();
+    } else profileCreated.textContent = '—';
+
+    // fetch examen stats
+    const examsSnap = await db.collection('users').doc(currentUser.uid).collection('examenes').orderBy('fecha','desc').get();
+    const exams = examsSnap.docs.map(s=>({ id: s.id, ...s.data(), fechaObj: s.data().fecha && s.data().fecha.toDate ? s.data().fecha.toDate() : null }));
+
+    profileCount.textContent = exams.length;
+
+    if(exams.length>0){
+      const best = exams.reduce((acc,e)=> e.puntaje > acc.puntaje ? e : acc, exams[0]);
+      profileBest.textContent = `${best.puntaje}/${best.total} (${best.modo})`;
+      const totalTime = exams.reduce((acc,e)=> acc + (e.duracionSeg||0), 0);
+      profileTime.textContent = `${Math.floor(totalTime/60)}m ${totalTime%60}s`;
+    } else {
+      profileBest.textContent = '—';
+      profileTime.textContent = '—';
+    }
+
+    // render history (last 20)
+    historyList.innerHTML = '';
+    exams.slice(0,20).forEach(e=>{
+      const d = e.fechaObj ? e.fechaObj.toLocaleString() : '—';
+      const el = document.createElement('div');
+      el.className = 'p-2 border rounded flex items-center justify-between';
+      el.innerHTML = `
+        <div class="text-sm">
+          <div><strong>${e.puntaje}/${e.total}</strong> — <span class="text-xs text-gray-600">${e.modo}</span></div>
+          <div class="text-xs text-gray-500">${d}</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost btnView" data-id="${e.id}">Ver</button>
+          <button class="btn btn-ghost btnLoad" data-id="${e.id}">Cargar</button>
+          <button class="btn btn-ghost btnJSON" data-id="${e.id}">JSON</button>
+        </div>
+      `;
+      historyList.appendChild(el);
+    });
+
+    // attach listeners (delegation)
+    historyList.querySelectorAll('.btnView').forEach(b=>{
+      b.onclick = async (ev)=>{
+        const id = b.dataset.id;
+        const doc = await db.collection('users').doc(currentUser.uid).collection('examenes').doc(id).get();
+        const d = doc.data();
+        alert(`Fecha: ${d.fecha && d.fecha.toDate ? d.fecha.toDate().toLocaleString() : '—'}\nPuntaje: ${d.puntaje}/${d.total}\nModo: ${d.modo}\nDuración: ${d.duracionSeg || 0}s`);
+      };
+    });
+    historyList.querySelectorAll('.btnLoad').forEach(b=>{
+      b.onclick = async ()=>{
+        const id = b.dataset.id;
+        const doc = await db.collection('users').doc(currentUser.uid).collection('examenes').doc(id).get();
+        const d = doc.data();
+        if(!d) return alert('No encontrado.');
+        // Cargar la ronda/respuestas en la app (si coincide la materia)
+        if (d.materia !== MATERIA_NOMBRE) return alert('El examen es de otra materia.');
+        ronda = d.ronda.map(r => ({ pregunta: r.pregunta, opciones: r.opciones, respuesta: r.respuesta }));
+        respuestas = d.respuestas || [];
+        idx = 0;
+        correctas = modoSel.value === 'estudio' ? respuestas.reduce((acc, r, i)=> acc + ((r===ronda[i].respuesta)?1:0), 0) : 0;
+        estado.textContent = `Cargado examen: ${d.puntaje}/${d.total} (${d.modo})`;
+        mostrarPregunta(); iniciarTimer();
+      };
+    });
+    historyList.querySelectorAll('.btnJSON').forEach(b=>{
+      b.onclick = async ()=>{
+        const id = b.dataset.id;
+        const doc = await db.collection('users').doc(currentUser.uid).collection('examenes').doc(id).get();
+        const d = doc.data();
+        const url = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)],{type:'application/json'}));
+        const a = document.createElement('a'); a.href = url; a.download = `examen-${id}.json`; a.click(); URL.revokeObjectURL(url);
+      };
+    });
+
+  }
+
+  btnRefreshProfile && (btnRefreshProfile.onclick = ()=> refreshProfile());
+  btnExportAll && (btnExportAll.onclick = async ()=>{
+    if(!currentUser) return alert('Inicia sesión.');
+    const snap = await db.collection('users').doc(currentUser.uid).collection('examenes').get();
+    const data = snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)],{type:'application/json'}));
+    const a = document.createElement('a'); a.href = url; a.download = `historial-${currentUser.uid}.json`; a.click(); URL.revokeObjectURL(url);
+  });
+
+  btnLoadProgress && (btnLoadProgress.onclick = loadProgressFromFirestore);
+  btnDeleteProgress && (btnDeleteProgress.onclick = async ()=>{
+    if(!currentUser) return alert('Inicia sesión.');
+    if(!confirm('Borrar progreso guardado?')) return;
+    try{
+      await db.collection('users').doc(currentUser.uid).collection('meta').doc('progress').delete();
+      alert('Progreso borrado.');
+    }catch(e){ console.error(e); alert('Error borrando progreso.'); }
+  });
+
+  // ------------------ AUTH STATE ------------------
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if(user){
+      authPanel.classList.add('hidden');
+      appPanel.classList.remove('hidden');
+      profilePanel.classList.remove('hidden');
+      historyPanel.classList.remove('hidden');
+      btnLogout.classList.remove('hidden');
+      userInfo.classList.remove('hidden');
+      userInfo.textContent = user.email;
+      authMsg.textContent = '';
+      try{
+        await ensureUserDoc(user);
+        await refreshProfile();
+      }catch(e){ console.error(e); }
+    } else {
+      authPanel.classList.remove('hidden');
+      appPanel.classList.add('hidden');
+      profilePanel.classList.add('hidden');
+      historyPanel.classList.add('hidden');
+      btnLogout.classList.add('hidden');
+      userInfo.classList.add('hidden');
+      userInfo.textContent = '';
+      authMsg.textContent = '';
+    }
+  });
+
+  // ----------------- DARK MODE -----------------
+  document.getElementById('toggleDark')?.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+  });
+
+  // ----------------- Helper: guardado automático al finalizar examen -----------------
+  // (ya incluido en finalizar())
+
+  // ----------------- FIN DEL SCRIPT PRINCIPAL -----------------
   </script>
 
-  <script src="app.js?v=11"></script>
+  <!-- Tu app.js (si lo prefieres external) puede seguir siendo incluido; aquí lo dejo comentado.
+  <script src="app.js?v=11"></script>-->
 
 </body>
 </html>
