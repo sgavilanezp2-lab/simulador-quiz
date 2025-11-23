@@ -968,17 +968,6 @@
     "explicacion": "La backbone colapsada centraliza el control y la distribución del tráfico en un único dispositivo potente, simplificando la administración."
   },
   {
-    "pregunta": "¿Cuál es el comando para activar el protocolo HSRP?",
-    "opciones": [
-      "stand HSRP",
-      "Stanby HSRP",
-      "HSRP stand by",
-      "standby version 2"
-    ],
-    "respuesta": 3,
-    "explicacion": "El comando 'standby version 2' se utiliza en la configuración de interfaces para habilitar la versión 2 del protocolo HSRP."
-  },
-  {
     "pregunta": "¿Cuál es la principal característica de los Circuitos Virtuales Permanentes (PVC) en una red Frame Relay en comparación con una conexión dedicada?",
     "opciones": [
       "Los PVC en Frame Relay requieren un nuevo establecimiento de conexión para cada transmisión de datos, incrementando la sobrecarga de la red.",
@@ -1045,17 +1034,6 @@
     "explicacion": "Frame Relay usa una única conexión física para múltiples PVC, lo que simplifica la conectividad y reduce los costos de red."
   },
   {
-    "pregunta": "¿Cuál es la función del siguiente comando? R1(config-if)# standby 1 preempt",
-    "opciones": [
-      "Activa el balanceo de carga de acuerdo a la disponibilidad de los routers.",
-      "El router pasivo queda encargado totalmente de administrar el tráfico de la red.",
-      "El router pasivo crea una IP virtual para administrar el tráfico de la red.",
-      "El router activo se hará cargo de la función de puerta de enlace cuando vuelva a funcionar."
-    ],
-    "respuesta": 3,
-    "explicacion": "El comando 'standby 1 preempt' permite que el router principal recupere el rol activo en HSRP una vez que vuelva a estar disponible."
-  },
-  {
     "pregunta": "Señale una ventaja de las redes backbone paralelas.",
     "opciones": [
       "Necesidad de Coordinación Avanzada",
@@ -1074,22 +1052,19 @@
       "255"
     ],
     "respuesta": 0,
-    "explicacion": "El valor 100 representa el costo acumulado más eficiente para alcanzar el servidor desde PC-A según la topología OSPF.",
+    "explicacion": "El valor 100 es la prioridad por defecto de HSRP/VRRP en los routers. Este valor determina qué router en el grupo de redundancia es el Activo.",
     "imagen": "img/topologia-prioridad.png"
   },
-{
-  "pregunta": "De acuerdo a la práctica realizada, ¿qué comando se debería ingresar para modificar la IP en S1?",
-  "opciones": [
-    "ip default-gateway 192.168.1.1",
-    "ip default-gateway 192.168.1.254",
-    "ip virtual-gateway 192.168.1.254",
-    "ip default-ip 192.168.1.1"
-  ],
-  "respuesta": 1,
-  "explicacion": "El comando correcto es 'ip default-gateway 192.168.1.254', ya que define la puerta de enlace predeterminada para el switch S1.",
-  "imagen": "imagen/topologia-modificar-ip.png"
-}
-
+  {
+    "pregunta": "De acuerdo a la práctica realizada, ¿qué comando se debería ingresar para modificar la IP en S1?",
+    "opciones": [
+      "ip default-gateway 192.168.1.1",
+      "ip default-gateway 192.168.1.254",
+      "ip virtual-gateway 192.168.1.254",
+      "ip default-ip 192.168.1.1"
+    ],
+    "respuesta": 1,
+    "explicacion": "El comando correcto es 'ip default-gateway 192.168.1.254', ya que define la puerta de enlace predeterminada para el switch S1.",
+    "imagen": "imagen/topologia-modificar-ip.png"
+  }
 ]
-
-
