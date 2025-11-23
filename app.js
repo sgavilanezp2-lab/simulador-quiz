@@ -1,29 +1,29 @@
 // ===============================
-// APP v12 - Simulador de preguntas
+// APP v12 - Simulador de preguntas (con Guardado Local)
 // ===============================
 
 // --- Config y estado ---
 
-// 1. ELIMINACIÓN DE mapaMaterias y se fija la URL de la materia
+// Materia Fija y configuración
 const MATERIA_URL = 'preguntas/escalabilidad.json';
-const CANTIDAD_EXAMEN = 30; // Nuevo límite para el modo examen
+const CANTIDAD_EXAMEN = 30; // Límite para el modo examen
+const MATERIA_NOMBRE = 'escalabilidad'; // Nuevo: Valor fijo para guardar en local
 
 const estado = document.getElementById('estado');
 const contenedor = document.getElementById('contenedor');
 const timerEl = document.getElementById('timer');
 
 const btnEmpezar = document.getElementById('btnEmpezar');
-// Se mantienen las referencias, aunque estarán ocultos en el HTML modificado
+// REINTRODUCIDOS: referencias a los botones de Guardar/Cargar
 const btnGuardar = document.getElementById('btnGuardar'); 
 const btnCargar = document.getElementById('btnCargar'); 
 
-// 2. SE ELIMINA materiaSel
-// const materiaSel = document.getElementById('materia');
+// SE ELIMINÓ materiaSel. Solo usamos los selectores que quedan.
 const modoSel = document.getElementById('modo');
 const minutosSel = document.getElementById('minutos');
 
-let banco = []; // El banco completo de preguntas (solo Escalabilidad)
-let ronda = []; // Las preguntas seleccionadas para la sesión (30 o todas)
+let banco = []; 
+let ronda = []; 
 let idx = 0;
 let correctas = 0;
 let respuestas = [];
@@ -35,14 +35,16 @@ function sample(a,n){ return shuffle(a).slice(0, Math.min(n, a.length)); }
 function fmt(seg){ const m=Math.floor(seg/60).toString().padStart(2,'0'); const s=(seg%60).toString().padStart(2,'0'); return `${m}:${s}`; }
 
 async function cargarMateria(){
-  const res = await fetch(MATERIA_URL); // Carga directa de la URL fija
+  const res = await fetch(MATERIA_URL); 
   if(!res.ok) throw new Error('No pude cargar el banco de preguntas de Escalabilidad');
   const data = await res.json();
   if(!Array.isArray(data)) throw new Error('El JSON de preguntas debe ser un arreglo');
   return data;
 }
 
-// --- Timer ---
+// --- Timer, Render, Responder, Feedback, DeshabilitarOpciones y Finalizar se mantienen igual ---
+// [El código de estas funciones es el mismo de tu último envío corregido, pero las omito aquí por brevedad.]
+
 function iniciarTimer(){
   clearInterval(interval);
   let seg = parseInt(minutosSel.value,10)*60;
@@ -54,7 +56,6 @@ function iniciarTimer(){
   },1000);
 }
 
-// --- Render pregunta + feedback (estilo mejorado) ---
 function mostrarPregunta(){
   if (idx >= ronda.length) { finalizar(false); return; }
   const q = ronda[idx];
@@ -165,24 +166,18 @@ function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
   });
 }
 
-// --- Finalizar + guardado (opcional Firestore) ---
 async function finalizar(porTiempo){
   clearInterval(interval);
   let total;
 
   if (modoSel.value === 'examen'){
-    // Se calcula el puntaje final del examen
     total = respuestas.reduce((acc, r, i)=> acc + (r===ronda[i].respuesta ? 1 : 0), 0);
   } else {
-    // Se usa el conteo acumulado en el modo estudio
     total = correctas;
   }
 
   estado.textContent = (porTiempo ? '⏰ Se acabó el tiempo. ' : '🏁 Finalizado. ') + `Puntaje: ${total}/${ronda.length}`;
   contenedor.innerHTML = '';
-
-  // 3. SE ELIMINA el intento de guardar en Firestore
-  // try{ ... }catch(e){ ... }
 }
 
 // --- Botones principales ---
@@ -193,15 +188,11 @@ btnEmpezar.onclick = async () => {
     contenedor.innerHTML = '';
     correctas = 0; respuestas = []; idx = 0;
 
-    // Carga el banco completo de Escalabilidad
     banco = await cargarMateria(); 
 
-    // Lógica de selección basada en el modo
     if (modoSel.value === 'examen') {
-        // Examen: 30 preguntas aleatorias (usando la función sample)
         ronda = sample(banco, CANTIDAD_EXAMEN);
     } else {
-        // Estudio: Todas las preguntas del banco (se barajan para evitar orden estático)
         ronda = shuffle(banco); 
     }
 
@@ -215,24 +206,30 @@ btnEmpezar.onclick = async () => {
   }
 };
 
-// --- Guardar/Cargar progreso local (opcional) ---
+// --- Guardar/Cargar progreso local (CORREGIDO) ---
 const STORAGE_KEY = 'simulador_quiz_estado_v1';
+
 btnGuardar && (btnGuardar.onclick = ()=>{
-  // 4. Se elimina la referencia a materiaSel al guardar y se fija el valor
-  const data = { materia: 'escalabilidad', modo: modoSel.value, minutos: minutosSel.value, ronda, idx, correctas, respuestas };
+    // CORRECCIÓN: Se usa la variable MATERIA_NOMBRE fija en lugar de materiaSel.value
+  const data = { materia: MATERIA_NOMBRE, modo: modoSel.value, minutos: minutosSel.value, ronda, idx, correctas, respuestas };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   alert('✅ Progreso guardado en este dispositivo.');
 });
+
 btnCargar && (btnCargar.onclick = ()=>{
   const raw = localStorage.getItem(STORAGE_KEY);
   if(!raw) return alert('No hay progreso guardado.');
   try{
     const d = JSON.parse(raw);
-    // 5. Se elimina la referencia a materiaSel al cargar
-    // materiaSel.value = d.materia;
+    
+    // CORRECCIÓN: No se intenta asignar a materiaSel.value ya que el elemento no existe.
+    if (d.materia !== MATERIA_NOMBRE) {
+        return alert(`El progreso guardado es de la materia "${d.materia}". Solo se admite "Escalabilidad de redes".`);
+    }
+
     modoSel.value = d.modo; minutosSel.value = d.minutos;
     ronda = d.ronda; idx = d.idx; correctas = d.correctas; respuestas = d.respuestas || [];
     estado.textContent = `Progreso cargado. Materia: Escalabilidad de redes — Preguntas: ${ronda.length}`;
     mostrarPregunta(); iniciarTimer();
-  }catch(e){ alert('No pude cargar el progreso.'); }
+  }catch(e){ alert('No pude cargar el progreso. Archivo corrupto.'); }
 });
