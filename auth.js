@@ -69,14 +69,14 @@ btnGoogle.onclick = async () => {
     let correo = result.user.email.toLowerCase();
 
     // ⛔ NUEVA VALIDACIÓN PEDIDA
-    const dominioCorrecto = correo.endsWith("@unemi.edu.ec");
     const estaEnLista = correosPermitidos.includes(correo);
 
-    if (!(dominioCorrecto && estaEnLista)) {
-      await auth.signOut();
-      authMsg.textContent = "Correo no autorizado.";
-      return;
-    }
+if (!estaEnLista) {
+  await auth.signOut();
+  authMsg.textContent = "Correo no autorizado.";
+  return;
+}
+
 
   } catch (e) {
     authMsg.textContent = e.message;
