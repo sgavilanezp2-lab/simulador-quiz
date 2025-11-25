@@ -1,287 +1,74 @@
-/* =========================================
-   1. ESTILOS BASE Y FONDO (DISEÑO AMIGO)
-   ========================================= */
+/* FONDO AZUL OSCURO (ESTILO AMIGO) */
 body {
-    background: #372da6; /* Fondo azul oscuro original */
+    background: #372da6; 
     margin: 0;
-    font-family: 'Poppins', sans-serif;
-    color: #333;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
 }
 
-/* =========================================
-   2. HEADER HOLOGRÁFICO (INTACTO)
-   ========================================= */
+/* HEADER HOLOGRÁFICO */
 .holo-header {
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 30px;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+    border-bottom: 2px solid #66eaff;
+    box-shadow: 0 0 15px #66eaff55;
     position: sticky;
     top: 0;
     z-index: 100;
-
-    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
-    border-bottom: 2px solid #66eaff;
-
-    /* Brillo holográfico */
-    box-shadow: 0 0 15px #66eaff55, inset 0 0 10px #66eaff33;
-    overflow: hidden;
 }
+.holo-header h1 { color: #66eaff; margin: 0; font-size: 1.4rem; text-shadow: 0 0 8px #66eaff; flex-grow: 1; text-align: center; }
+.holo-btn { background: transparent; border: 1px solid #66eaff; color: #66eaff; padding: 5px 15px; border-radius: 4px; }
 
-.holo-header::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 300%;
-    height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(102, 234, 255, 0.25) 50%,
-        transparent 100%
-    );
-    transform: skewX(-25deg);
-    animation: holo-scan 6s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes holo-scan {
-    0% { left: -150%; }
-    100% { left: 150%; }
-}
-
-.holo-header h1 {
-    color: #66eaff;
-    margin: 0;
-    font-size: 1.5rem; /* Ajustado un poco para móviles */
-    text-shadow: 0 0 8px #66eaff, 0 0 14px #44ccee;
-    letter-spacing: 1px;
-    animation: glow-breathe 3s infinite ease-in-out;
-    text-align: center;
-    flex-grow: 1;
-}
-
-@keyframes glow-breathe {
-    0% { opacity: 1; text-shadow: 0 0 8px #66eaff; }
-    50% { opacity: 0.85; text-shadow: 0 0 4px #66eaff; }
-    100% { opacity: 1; text-shadow: 0 0 10px #66eaff; }
-}
-
-.holo-btn {
-    background: transparent;
-    border: 2px solid #66eaff99;
-    color: #66eaff;
-    padding: 8px 15px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 0 8px #66eaff55;
-    text-shadow: 0 0 6px #66eaff;
-    transition: 0.25s ease;
-    position: relative;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.holo-btn:hover {
-    box-shadow: 0 0 14px #66eaffaa;
-    transform: scale(1.05);
-}
-
-/* =========================================
-   3. CONTENEDOR PRINCIPAL (TARJETA BLANCA)
-   ========================================= */
-.container {
-    width: 90%;
-    max-width: 500px; /* Ancho por defecto para Login */
-    background: #ffffff;
-    padding: 30px;
+/* CONTENEDOR DE LA TARJETA BLANCA */
+.app-card {
+    background: white;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    margin-top: 40px;
-    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 500px; /* Ancho controlado como tu foto */
+    margin: 40px auto;
+    padding: 30px;
+    position: relative;
     text-align: center;
-    transition: max-width 0.3s ease;
 }
 
-/* Cuando mostramos la App, hacemos el contenedor más ancho */
-.app-container {
-    max-width: 800px; 
-}
+/* BOTÓN CERRAR SESIÓN */
+.top-actions { width: 90%; max-width: 500px; display: flex; justify-content: flex-end; margin-top: 20px; }
+.btn-logout { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
 
-h2 { margin-top: 0; color: #333; }
-p { color: #666; }
+/* CONTROLES DEL FORMULARIO (Input, Select) */
+.input-group { text-align: left; margin-bottom: 15px; }
+.input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 5px; }
+.input-box { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font-size: 0.95rem; }
 
+/* BOTONES */
+.google-btn { width: 100%; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-weight: 500; }
+.btn-start { width: 100%; background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
+.btn-start:hover { background: #1557b0; }
+
+.sub-actions { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+.link-btn { background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.85rem; }
+
+/* ESTILOS QUIZ */
 .hidden { display: none !important; }
+.timer-display { font-family: monospace; font-size: 1.2rem; color: #1a73e8; font-weight: bold; text-align: right; margin-bottom: 10px; }
+.quiz-image { max-width: 100%; border-radius: 8px; border: 1px solid #eee; margin: 10px auto; display: block; }
 
-/* =========================================
-   4. BOTONES Y CONTROLES GENERALES
-   ========================================= */
-button {
-    cursor: pointer;
-    border: none;
-    font-family: inherit;
-    transition: all 0.2s;
-}
+/* RESPUESTAS */
+.opt { width: 100%; text-align: left; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+.opt:hover:not(:disabled) { background: #f0f9ff; border-color: #1a73e8; }
+.option-selected { background: #e0e7ff !important; border: 2px solid #4f46e5 !important; font-weight: bold; }
+.ans-correct { background: #dcfce7 !important; border: 2px solid #22c55e !important; color: #14532d; }
+.ans-wrong { background: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #7f1d1d; text-decoration: line-through; }
 
-/* Botón Google del Login */
-#btnGoogle {
-    background-color: white;
-    color: #3c4043;
-    border: 1px solid #dadce0;
-    border-radius: 50px;
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    margin-top: 20px;
-}
-#btnGoogle:hover { background-color: #f8f9fa; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-/* Inputs y Selects */
-select, input {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background: #f9f9f9;
-    font-size: 0.95rem;
-}
-
-/* =========================================
-   5. BARRA DE CONTROLES DE LA APP
-   ========================================= */
-.controls-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.selectors-group {
-    display: flex;
-    gap: 8px;
-    flex-grow: 1;
-}
-.selectors-group select { width: 100%; }
-
-.timer-logout-group {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.timer-box {
-    font-weight: bold;
-    color: #1a73e8;
-    font-size: 1.2rem;
-    min-width: 60px;
-}
-
-/* BOTÓN CERRAR SESIÓN (ROJO) */
-.btn-logout {
-    background-color: #ea4335;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: bold;
-}
-.btn-logout:hover { background-color: #d33828; }
-
-/* BOTONES DE ACCIÓN (EMPEZAR, GUARDAR...) */
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.btn-primary {
-    background-color: #1a73e8;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 1rem;
-}
-.btn-primary:hover { background-color: #1557b0; }
-
-.btn-secondary {
-    background-color: #f1f3f4;
-    color: #333;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-weight: 500;
-}
-.btn-secondary:hover { background-color: #e8eaed; }
-
-/* =========================================
-   6. ESTILOS DEL QUIZ (PREGUNTAS)
-   ========================================= */
-#contenedor {
-    margin-top: 20px;
-    text-align: left;
-}
-
-/* Imágenes de topología */
-.quiz-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    margin: 15px 0;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Opciones de respuesta */
-.opt {
-    width: 100%;
-    text-align: left;
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    transition: all 0.2s;
-}
-.opt:hover:not(:disabled) {
-    background-color: #e8f0fe;
-    border-color: #1a73e8;
-}
-
-/* Estados de las respuestas (Verde/Rojo) */
-.option-selected {
-    background-color: #e8f0fe !important;
-    border: 2px solid #1a73e8 !important;
-    font-weight: bold;
-}
-
-.ans-correct {
-    background-color: #d1e7dd !important;
-    border-color: #0f5132 !important;
-    color: #0f5132;
-}
-
-.ans-wrong {
-    background-color: #f8d7da !important;
-    border-color: #842029 !important;
-    color: #842029;
-    text-decoration: line-through;
-}
+.btn-action { padding: 8px 20px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; }
+.btn-action.yellow { background: #eab308; }
+.btn-action.gray { background: #4b5563; }
+.btn-action.blue { background: #1a73e8; }
