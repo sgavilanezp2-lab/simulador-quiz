@@ -1,4 +1,4 @@
-// LISTA BLANCA
+// LISTA BLANCA DE CORREOS AUTORIZADOS
 const correosPermitidos = [
   "dpachecog2@unemi.edu.ec", "cnavarretem4@unemi.edu.ec", "htigrer@unemi.edu.ec",
   "gorellanas2@unemi.edu.ec", "iastudillol@unemi.edu.ec", "sgavilanezp2@unemi.edu.ec",
@@ -13,10 +13,10 @@ const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
 const authMsg = document.getElementById("authMsg");
 const btnGoogle = document.getElementById("btnGoogle");
-// REFERENCIA CORREGIDA: Botón dentro del Header
+// REFERENCIA AL BOTÓN DENTRO DEL HEADER
 const btnLogout = document.getElementById("btnLogoutHeader"); 
 
-// Validar Seguridad
+// ID Dispositivo
 function getDeviceId() {
   let id = localStorage.getItem("deviceId_secure");
   if (!id) {
@@ -26,6 +26,7 @@ function getDeviceId() {
   return id;
 }
 
+// Validar Dispositivos en Firestore
 async function validarSeguridad(user) {
   try {
     const userRef = db.collection("usuarios_seguros").doc(user.email); 
@@ -78,7 +79,7 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// Botón Logout
+// Botón Logout (Conectado al botón del Header)
 if (btnLogout) {
   btnLogout.onclick = () => {
     auth.signOut().then(() => window.location.reload());
@@ -97,17 +98,16 @@ auth.onAuthStateChanged(async (user) => {
       appPanel.classList.remove("hidden");
       if(btnLogout) btnLogout.classList.remove("hidden"); 
       
-      // ****** SOLUCIÓN A LA REGRESIÓN ******
-      // Forzamos la búsqueda de los elementos de texto aquí
+      // ******* CORRECCIÓN DE REGRESIÓN: UI *******
       const userEmailDisplay = document.getElementById("userEmailDisplay");
       const verificationMsg = document.getElementById("verificationMsg");
       
       if(userEmailDisplay) userEmailDisplay.textContent = user.email; // Pone el correo
       if(verificationMsg) verificationMsg.classList.remove("hidden"); // Muestra el mensaje verde
-      // *************************************
+      // *******************************************
 
     } else {
-      // FALLO (Límite de Dispositivos)
+      // FALLO
       alert(validacion.msg);
       await auth.signOut();
       window.location.reload();
