@@ -13,7 +13,7 @@ body {
 }
 
 /* =========================================
-   2. HEADER HOLOGRÁFICO (MANTENIDO IGUAL)
+   2. HEADER HOLOGRÁFICO (CON BOTÓN INTEGRADO)
    ========================================= */
 .holo-header {
     width: 100%;
@@ -38,6 +38,13 @@ body {
     flex-grow: 1;
 }
 
+.header-right-group {
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-end; 
+    gap: 5px;
+}
+
 .holo-btn {
     background: transparent;
     border: 1px solid #66eaff;
@@ -48,43 +55,33 @@ body {
     cursor: default;
 }
 
-/* =========================================
-   3. BOTÓN CERRAR SESIÓN (FLOTANTE EXTERNO)
-   ========================================= */
-.logout-container {
-    width: 100%;
-    max-width: 500px;
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 15px;
-    padding-right: 10px;
-}
-
-#btnLogout {
-    background-color: #ef4444; /* Rojo */
+/* Botón Cerrar Sesión Integrado (Rojo, pequeño) */
+.btn-logout-integrated {
+    background-color: #ef4444; 
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 0.85rem;
+    padding: 3px 8px; 
+    border-radius: 4px;
+    font-weight: 500; 
+    font-size: 0.75rem; 
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: background 0.2s;
+    line-height: 1.5; 
 }
-#btnLogout:hover { background-color: #dc2626; }
+.btn-logout-integrated:hover { background-color: #dc2626; }
 
 /* =========================================
-   4. TARJETA BLANCA CENTRAL
+   3. TARJETA BLANCA CENTRAL
    ========================================= */
 .app-card {
     background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Sombra suave */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
     border: 1px solid #e5e7eb;
     width: 90%;
-    max-width: 450px; /* Ancho controlado */
-    margin: 10px auto 40px auto;
+    max-width: 450px; 
+    margin: 40px auto; /* Margin top 40px desde el header */
     padding: 30px;
     text-align: center;
     position: relative;
@@ -107,7 +104,6 @@ body {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     cursor: pointer; font-weight: 500; color: #444;
 }
-.google-btn:hover { background-color: #f9fafb; }
 
 /* Botón Empezar */
 .btn-start {
@@ -116,13 +112,13 @@ body {
     border: none; font-size: 1rem; cursor: pointer; margin-top: 15px;
     box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2);
 }
-.btn-start:hover { background-color: #1557b0; }
 
-/* Textos de estado */
-.user-info { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+/* Estilos de Utilidad */
 .hidden { display: none !important; }
+.user-info { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+.sub-actions { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
 
-/* Estilos del Quiz (Preguntas) */
+/* Estilos del Quiz */
 .quiz-image { max-width: 100%; border-radius: 8px; border: 1px solid #eee; margin: 10px auto; display: block; }
 .opt { width: 100%; text-align: left; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
 .opt:hover:not(:disabled) { background: #f0f9ff; border-color: #1a73e8; }
