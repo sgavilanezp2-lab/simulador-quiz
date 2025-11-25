@@ -1,183 +1,269 @@
 // Configuración
-// CORRECCIÓN: Se agrega la carpeta "preguntas/"
-const MATERIA_URL = 'preguntas/escalabilidad.json'; 
+const MATERIA_URL = 'preguntas/escalabilidad.json'; // Asegúrate que el JSON tenga "img/"
 const CANTIDAD_EXAMEN = 30;
 const MATERIA_NOMBRE = 'escalabilidad';
 
-const estado = document.getElementById('estado');
-const contenedor = document.getElementById('contenedor');
+// Elementos DOM
+const startScreen = document.getElementById('startScreen');
+const quizContainer = document.getElementById('quizContainer');
+const resultScreen = document.getElementById('resultScreen');
+const reviewContainer = document.getElementById('reviewContainer');
+const reviewActions = document.getElementById('reviewActions');
+const scoreDisplay = document.getElementById('scoreDisplay');
 const timerEl = document.getElementById('timer');
+const estado = document.getElementById('estado');
+
+// Botones
 const btnEmpezar = document.getElementById('btnEmpezar');
-const btnGuardar = document.getElementById('btnGuardar'); 
-const btnCargar = document.getElementById('btnCargar'); 
+const btnReview = document.getElementById('btnReview');
+const btnGuardar = document.getElementById('btnGuardar');
+const btnCargar = document.getElementById('btnCargar');
 const modoSel = document.getElementById('modo');
 const minutosSel = document.getElementById('minutos');
 
-let banco = []; 
-let ronda = []; 
-let idx = 0;
-let correctas = 0;
-let respuestas = [];
+// Variables de Estado
+let banco = [];
+let ronda = []; // Preguntas seleccionadas
+let idx = 0; // Índice actual
+let respuestasUsuario = []; // Guardamos índice de opción (0, 1, 2...)
+let seleccionTemporal = null; // Lo que el usuario marca antes de dar siguiente
 let interval = null;
 
-// Utils
-function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
-function sample(a,n){ return shuffle(a).slice(0, Math.min(n, a.length)); }
-function fmt(seg){ const m=Math.floor(seg/60).toString().padStart(2,'0'); const s=(seg%60).toString().padStart(2,'0'); return `${m}:${s}`; }
-
+// --- 1. CARGAR DATOS ---
 async function cargarMateria(){
-  const res = await fetch(MATERIA_URL); 
-  if(!res.ok) throw new Error('No pude cargar el banco de preguntas (verifique preguntas/escalabilidad.json)');
-  const data = await res.json();
-  return data;
+  try {
+    const res = await fetch(MATERIA_URL); 
+    if(!res.ok) throw new Error('Error cargando JSON');
+    banco = await res.json();
+    return true;
+  } catch(e) {
+    estado.textContent = "Error: " + e.message;
+    return false;
+  }
 }
 
+// --- 2. LOGICA DEL TIMER ---
 function iniciarTimer(){
   clearInterval(interval);
   let seg = parseInt(minutosSel.value,10)*60;
-  if (seg <= 0){ timerEl.textContent = 'Sin tiempo'; return; }
+  if (seg <= 0){ timerEl.textContent = '∞'; return; }
+  
   timerEl.textContent = fmt(seg);
   interval = setInterval(()=>{
-    seg--; timerEl.textContent = fmt(seg);
-    if(seg<=0){ clearInterval(interval); finalizar(true); }
+    seg--; 
+    timerEl.textContent = fmt(seg);
+    if(seg<=0){ 
+      clearInterval(interval); 
+      finalizarQuiz(true); // Se acabó el tiempo
+    }
   },1000);
 }
+function fmt(seg){ 
+  const m=Math.floor(seg/60).toString().padStart(2,'0'); 
+  const s=(seg%60).toString().padStart(2,'0'); 
+  return `${m}:${s}`; 
+}
 
+// --- 3. INICIAR EL QUIZ ---
+btnEmpezar.onclick = async () => {
+  btnEmpezar.disabled = true;
+  estado.textContent = "Cargando preguntas...";
+  
+  const cargo = await cargarMateria();
+  if(!cargo) { btnEmpezar.disabled = false; return; }
+
+  // Preparar ronda
+  respuestasUsuario = [];
+  idx = 0;
+  correctas = 0;
+
+  if (modoSel.value === 'examen') {
+    ronda = sample(banco, CANTIDAD_EXAMEN);
+  } else {
+    ronda = shuffle(banco);
+  }
+
+  // Cambiar Pantallas
+  startScreen.classList.add('hidden');
+  quizContainer.classList.remove('hidden');
+  
+  iniciarTimer();
+  mostrarPregunta();
+};
+
+// --- 4. MOSTRAR PREGUNTA ---
 function mostrarPregunta(){
-  if (idx >= ronda.length) { finalizar(false); return; }
+  seleccionTemporal = null; // Reset selección
+
+  if (idx >= ronda.length) { 
+    finalizarQuiz(false); 
+    return; 
+  }
+
   const q = ronda[idx];
 
-  contenedor.innerHTML = `
-    <div class="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100 p-5">
-      <div class="flex items-center gap-2 mb-2">
-        <span class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border">Pregunta ${idx+1} / ${ronda.length}</span>
+  quizContainer.innerHTML = `
+    <div class="bg-white/90 p-5 rounded-2xl border border-blue-100 shadow-sm">
+      <div class="flex justify-between mb-4">
+         <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Pregunta ${idx+1} de ${ronda.length}</span>
       </div>
 
-      <h2 class="text-lg font-semibold mb-3 text-gray-800">${q.pregunta}</h2>
+      <h2 class="text-lg font-bold text-gray-800 mb-4">${q.pregunta}</h2>
       
       ${q.imagen ? `
-      <div class="flex justify-center my-4">
-        <img src="${q.imagen}" alt="Imagen pregunta"
-              class="max-w-full md:max-w-xl rounded-xl border shadow-md">
-      </div>
-      ` : ''}
+      <div class="flex justify-center mb-4">
+        <img src="${q.imagen}" class="max-w-full h-auto max-h-60 rounded-lg border shadow-sm">
+      </div>` : ''}
 
-      <div id="opciones" class="space-y-2"></div>
-      <div id="feedback" class="mt-4 text-sm"></div>
+      <div id="opcionesBox" class="flex flex-col gap-3"></div>
 
-      <div class="mt-5 flex gap-2">
-        <button id="btnPrev" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition" ${idx===0 ? "disabled" : ""}>Anterior</button>
-        <button id="btnNext" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition">Siguiente</button>
-        <button id="btnFin" class="ml-auto px-4 py-2 rounded-xl border bg-indigo-600 text-white hover:bg-indigo-700 transition">Finalizar</button>
+      <div class="mt-6 flex justify-end">
+        <button id="btnSiguiente" class="px-6 py-2 rounded-xl bg-blue-600 text-white font-bold opacity-50 cursor-not-allowed" disabled>
+          ${idx === ronda.length - 1 ? 'Finalizar' : 'Siguiente'}
+        </button>
       </div>
     </div>
   `;
 
-  const wrap = document.getElementById('opciones');
-  wrap.innerHTML = q.opciones.map((op,i)=>`
-    <button class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition text-gray-700" data-i="${i}">
-      ${op}
-    </button>
-  `).join('');
-
-  wrap.querySelectorAll('.opt').forEach(btn=>{
-    btn.addEventListener('click', () => responder(parseInt(btn.dataset.i,10)));
+  const opcionesBox = document.getElementById('opcionesBox');
+  
+  q.opciones.forEach((op, i) => {
+    const btn = document.createElement('button');
+    btn.className = "opt w-full text-left px-4 py-3 rounded-xl border border-gray-200 bg-white hover:bg-blue-50 transition text-gray-700";
+    btn.textContent = op;
+    btn.onclick = () => seleccionar(i, btn);
+    opcionesBox.appendChild(btn);
   });
 
-  document.getElementById('btnPrev').onclick = () => { if (idx>0) { idx--; mostrarPregunta(); } };
-  document.getElementById('btnNext').onclick = () => { if (idx<ronda.length-1) { idx++; mostrarPregunta(); } else { finalizar(false); } };
-  document.getElementById('btnFin').onclick  = () => finalizar(false);
-
-  if (respuestas[idx] != null){
-    deshabilitarOpciones(q.respuesta, respuestas[idx], modoSel.value==='examen');
-    if (modoSel.value==='estudio') mostrarFeedback(respuestas[idx]===q.respuesta, q);
-  }
+  document.getElementById('btnSiguiente').onclick = avanzar;
 }
 
-function responder(iElegido){
-  const q = ronda[idx];
-  if (modoSel.value === 'estudio' && respuestas[idx] !== undefined) {
-    if (respuestas[idx] === q.respuesta) correctas--;
-  }
-  respuestas[idx] = iElegido;
+// --- 5. SELECCIONAR OPCIÓN (Como en tu código) ---
+function seleccionar(index, btnRef) {
+  seleccionTemporal = index;
+  
+  // Quitar clase selected a todos
+  const allBtns = document.querySelectorAll('#opcionesBox button');
+  allBtns.forEach(b => b.classList.remove('option-selected', 'bg-indigo-50', 'ring-2', 'ring-indigo-500'));
 
-  if (modoSel.value === 'estudio'){
-    const ok = iElegido === q.respuesta;
-    if (ok) correctas++;
-    mostrarFeedback(ok, q);
-    deshabilitarOpciones(q.respuesta, iElegido, false);
-  } else {
-    deshabilitarOpciones(null, iElegido, true);
-  }
+  // Poner clase al seleccionado
+  btnRef.classList.add('option-selected', 'bg-indigo-50', 'ring-2', 'ring-indigo-500');
+
+  // Habilitar botón siguiente
+  const btnNext = document.getElementById('btnSiguiente');
+  btnNext.disabled = false;
+  btnNext.classList.remove('opacity-50', 'cursor-not-allowed');
+  btnNext.classList.add('hover:bg-blue-700');
 }
 
-function mostrarFeedback(ok, q){
-  const box = document.getElementById('feedback');
-  const correcta = q.opciones[q.respuesta];
-  const exp = q.explicacion ? ` ${q.explicacion}` : '';
-  if(ok){
-    box.className = 'mt-3 text-sm rounded border bg-green-50 border-green-200 text-green-800 px-3 py-2';
-    box.textContent = '✅ ¡Correcto!' + exp;
-  }else{
-    box.className = 'mt-3 text-sm rounded border bg-red-50 border-red-200 text-red-800 px-3 py-2';
-    box.textContent = `❌ Incorrecto. Respuesta correcta: "${correcta}".` + exp;
-  }
+// --- 6. AVANZAR ---
+function avanzar() {
+  if (seleccionTemporal === null) return; // Seguridad extra
+  
+  respuestasUsuario.push(seleccionTemporal);
+  idx++;
+  mostrarPregunta();
 }
 
-function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
-  document.querySelectorAll('#opciones .opt').forEach((b,i)=>{
-    b.disabled = true;
-    b.classList.add('disabled:opacity-80');
-    if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) b.classList.add('ring-2','ring-green-300', 'bg-green-50');
-    if (i===indiceElegida) b.classList.add('ring-2','ring-indigo-300');
-  });
-}
-
-async function finalizar(porTiempo){
+// --- 7. FINALIZAR Y MOSTRAR PUNTAJE ---
+function finalizarQuiz(porTiempo) {
   clearInterval(interval);
-  let total;
-  if (modoSel.value === 'examen'){
-    total = respuestas.reduce((acc, r, i)=> acc + (r===ronda[i].respuesta ? 1 : 0), 0);
-  } else {
-    total = correctas;
-  }
-  estado.textContent = (porTiempo ? '⏰ Se acabó el tiempo. ' : '🏁 Finalizado. ') + `Puntaje: ${total}/${ronda.length}`;
-  contenedor.innerHTML = '';
+  quizContainer.classList.add('hidden');
+  resultScreen.classList.remove('hidden');
+
+  // Calcular aciertos
+  let aciertos = 0;
+  ronda.forEach((p, i) => {
+    if (respuestasUsuario[i] === p.respuesta) aciertos++;
+  });
+
+  scoreDisplay.textContent = `${aciertos} / ${ronda.length}`;
+  
+  if(porTiempo) alert("¡Se acabó el tiempo!");
 }
 
-btnEmpezar.onclick = async () => {
-  try{
-    btnEmpezar.disabled = true;
-    estado.textContent = 'Cargando preguntas...';
-    contenedor.innerHTML = '';
-    correctas = 0; respuestas = []; idx = 0;
-    banco = await cargarMateria(); 
-    if (modoSel.value === 'examen') ronda = sample(banco, CANTIDAD_EXAMEN);
-    else ronda = shuffle(banco); 
-    estado.textContent = `Modo: ${modoSel.value.toUpperCase()} — Preguntas: ${ronda.length}`;
-    mostrarPregunta();
-    iniciarTimer();
-  }catch(e){
-    estado.textContent = 'Error: ' + e.message;
-  }finally{
-    btnEmpezar.disabled = false;
-  }
+// --- 8. LÓGICA DE REVISIÓN (Como la tuya) ---
+btnReview.onclick = () => {
+  resultScreen.classList.add('hidden');
+  reviewContainer.classList.remove('hidden');
+  reviewActions.classList.remove('hidden');
+  
+  reviewContainer.innerHTML = ''; // Limpiar
+
+  ronda.forEach((p, i) => {
+    const userAns = respuestasUsuario[i]; // Qué respondió el usuario
+    const isCorrect = (userAns === p.respuesta);
+    
+    // Crear tarjeta de revisión
+    const card = document.createElement('div');
+    card.className = "bg-white p-4 rounded-xl border shadow-sm text-left";
+    
+    let htmlContent = `
+      <p class="font-bold text-gray-800 mb-2">${i+1}. ${p.pregunta}</p>
+      ${p.imagen ? `<img src="${p.imagen}" class="max-h-40 mb-2 rounded border">` : ''}
+      <div class="flex flex-col gap-1 text-sm">
+    `;
+
+    p.opciones.forEach((op, optIndex) => {
+      let claseExtra = "";
+      let icono = "";
+
+      // Logica de colores EXACTA a la tuya
+      if (optIndex === p.respuesta) {
+        // Esta es la correcta -> VERDE
+        claseExtra = "ans-correct";
+        icono = "✅";
+      } else if (optIndex === userAns && !isCorrect) {
+        // El usuario eligió esta y está mal -> ROJA
+        claseExtra = "ans-wrong";
+        icono = "❌";
+      } else if (optIndex === userAns && isCorrect) {
+        // Usuario eligió bien (ya cubierto arriba, pero por si acaso)
+        claseExtra = "ans-correct"; 
+      }
+
+      // Marcamos visualmente cuál seleccionó el usuario (borde azul) si no es ni correcta ni incorrecta roja
+      let borderClass = (optIndex === userAns) ? "border-2 border-blue-500" : "border border-gray-200";
+
+      htmlContent += `
+        <div class="p-2 rounded ${borderClass} ${claseExtra} flex justify-between items-center">
+          <span>${op}</span>
+          <span>${icono}</span>
+        </div>
+      `;
+    });
+
+    htmlContent += `
+      </div>
+      <div class="mt-2 text-xs text-gray-500 italic bg-gray-50 p-2 rounded">
+        <strong>Explicación:</strong> ${p.explicacion || "Sin explicación disponible."}
+      </div>
+    `;
+
+    card.innerHTML = htmlContent;
+    reviewContainer.appendChild(card);
+  });
 };
 
-const STORAGE_KEY = 'simulador_quiz_estado_v1';
-btnGuardar && (btnGuardar.onclick = ()=>{
-  const data = { materia: MATERIA_NOMBRE, modo: modoSel.value, minutos: minutosSel.value, ronda, idx, correctas, respuestas };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert('✅ Progreso guardado.');
-});
-btnCargar && (btnCargar.onclick = ()=>{
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return alert('No hay progreso guardado.');
-  try{
-    const d = JSON.parse(raw);
-    modoSel.value = d.modo; minutosSel.value = d.minutos;
-    ronda = d.ronda; idx = d.idx; correctas = d.correctas; respuestas = d.respuestas || [];
-    estado.textContent = `Progreso cargado.`;
-    mostrarPregunta(); iniciarTimer();
-  }catch(e){ alert('Error cargando progreso.'); }
-});
+// Utils Arrays
+function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
+function sample(a,n){ return shuffle(a).slice(0, Math.min(n, a.length)); }
+
+// Guardado Local (Opcional)
+const STORAGE_KEY = 'simulador_v2_data';
+btnGuardar.onclick = () => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ronda, respuestasUsuario, idx }));
+  alert("Progreso guardado (Solo funciona si no has terminado el examen)");
+};
+btnCargar.onclick = () => {
+  const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(data) {
+    ronda = data.ronda; respuestasUsuario = data.respuestasUsuario; idx = data.idx;
+    startScreen.classList.add('hidden');
+    quizContainer.classList.remove('hidden');
+    iniciarTimer();
+    mostrarPregunta();
+  } else {
+    alert("No hay datos guardados");
+  }
+};
