@@ -13,16 +13,9 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-
     background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
     border-bottom: 2px solid #66eaff;
-
-    /* brillo holográfico en borde */
-    box-shadow:
-        0 0 15px #66eaff55,
-        inset 0 0 10px #66eaff33;
-    
-    /* reflejo holográfico animado */
+    box-shadow: 0 0 15px #66eaff55, inset 0 0 10px #66eaff33;
     overflow: hidden;
 }
 
@@ -33,33 +26,26 @@ body {
     left: -150%;
     width: 300%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(102, 234, 255, 0.25) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(120deg, transparent 0%, rgba(102, 234, 255, 0.25) 50%, transparent 100%);
     transform: skewX(-25deg);
     animation: holo-scan 6s linear infinite;
     pointer-events: none;
 }
 
-/* ANIMACIÓN DEL EFECTO LÁSER */
 @keyframes holo-scan {
     0% { left: -150%; }
     100% { left: 150%; }
 }
 
-/* TITULO CON GLOW SUAVE */
 .holo-header h1 {
     color: #66eaff;
     margin: 0;
     font-size: 1.7rem;
-    text-shadow:
-        0 0 8px #66eaff,
-        0 0 14px #44ccee;
+    text-shadow: 0 0 8px #66eaff, 0 0 14px #44ccee;
     letter-spacing: 1px;
     animation: glow-breathe 3s infinite ease-in-out;
+    text-align: center;
+    width: 100%;
 }
 
 @keyframes glow-breathe {
@@ -68,7 +54,6 @@ body {
     100% { opacity: 1; text-shadow: 0 0 10px #66eaff; }
 }
 
-/* BOTÓN HOLOGRÁFICO */
 .holo-btn {
     background: transparent;
     border: 2px solid #66eaff99;
@@ -77,7 +62,6 @@ body {
     font-size: 0.95rem;
     border-radius: 8px;
     cursor: pointer;
-
     box-shadow: 0 0 8px #66eaff55;
     text-shadow: 0 0 6px #66eaff;
     transition: 0.25s ease;
@@ -85,7 +69,6 @@ body {
     overflow: hidden;
 }
 
-/* efecto holográfico al pasar el mouse */
 .holo-btn::before {
     content: "";
     position: absolute;
@@ -93,12 +76,7 @@ body {
     left: -120%;
     width: 250%;
     height: 100%;
-    background: linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(102, 234, 255, 0.3) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(120deg, transparent 0%, rgba(102, 234, 255, 0.3) 50%, transparent 100%);
     transform: skewX(-25deg);
     transition: 0.5s ease;
 }
@@ -110,8 +88,4 @@ body {
 .holo-btn:hover {
     box-shadow: 0 0 14px #66eaffaa;
     transform: scale(1.05);
-}
-.holo-header h1 {
-    text-align: center;
-    width: 100%;
 }
