@@ -8,7 +8,6 @@ const correosPermitidos = [
   "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com"
 ];
 
-// --- Función de Toast ---
 function toast(msg) {
   let t = document.createElement("div");
   t.className = "toast";
@@ -17,20 +16,18 @@ function toast(msg) {
   setTimeout(() => t.remove(), 3000);
 }
 
-// --- Elementos del DOM ---
+// Elementos del DOM
 const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
-
 const email = document.getElementById("email");
 const password = document.getElementById("password");
 const authMsg = document.getElementById("authMsg");
-
 const btnLogin = document.getElementById("btnLogin");
 const btnRegistro = document.getElementById("btnRegistro");
 const btnGoogle = document.getElementById("btnGoogle");
 const btnLogout = document.getElementById("btnLogout");
 
-// --- ID de dispositivo ---
+// --- GENERAR ID DE DISPOSITIVO ---
 function getDeviceId() {
   let id = localStorage.getItem("deviceId");
   if (!id) {
@@ -40,113 +37,106 @@ function getDeviceId() {
   return id;
 }
 
-// --- Registrar intentos fallidos ---
+// --- REGISTRAR INTENTO FALLIDO (no bloquea el login) ---
 async function registrarIntentoFallido(correo) {
-  await db.collection("loginAttempts").add({
-    email: correo,
-    fecha: new Date(),
-    dispositivo: getDeviceId()
-  });
+  try {
+    await db.collection("loginAttempts").add({
+      email: correo,
+      fecha: new Date(),
+      dispositivo: getDeviceId()
+    });
+  } catch(e) {
+    console.warn("No se pudo registrar intento:", e.message);
+  }
 }
 
-// --- Validar dispositivos ---
+// --- VALIDAR DISPOSITIVOS (async, no bloquea la entrada) ---
 async function validarDispositivos(user) {
-  const ref = db.collection("users").doc(user.uid);
-  const snap = await ref.get();
-  const devId = getDeviceId();
+  try {
+    const ref = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    const devId = getDeviceId();
 
-  if (!snap.exists) {
-    await ref.set({
-      email: user.email,
-      devices: [devId],
+    if (!snap.exists) {
+      await ref.set({
+        email: user.email,
+        devices: [devId],
+        lastLogin: new Date()
+      });
+      return true;
+    }
+
+    let data = snap.data();
+    let devices = data.devices || [];
+
+    if (!devices.includes(devId)) {
+      if (devices.length >= 2) {
+        return false;
+      }
+      devices.push(devId);
+    }
+
+    await ref.update({
+      devices,
       lastLogin: new Date()
     });
+
     return true;
+
+  } catch(e) {
+    console.warn("Error validando dispositivos:", e.message);
+    return true; // si falla Firestore, dejar pasar para no bloquear acceso
   }
-
-  let data = snap.data();
-  let devices = data.devices || [];
-
-  if (!devices.includes(devId)) {
-    if (devices.length >= 2) return false; // Límite de 2 dispositivos
-    devices.push(devId);
-  }
-
-  await ref.update({
-    devices,
-    lastLogin: new Date()
-  });
-
-  return true;
 }
 
-// --- LOGIN EMAIL/PASS ---
+// --- LOGIN ---
 btnLogin.onclick = async () => {
   try {
     let correo = email.value.trim().toLowerCase();
 
     if (!correosPermitidos.includes(correo)) {
       toast("ACCESO DENEGADO");
-      await registrarIntentoFallido(correo);
+      registrarIntentoFallido(correo);
       return;
     }
 
-    const result = await auth.signInWithEmailAndPassword(correo, password.value);
-
-    const permitido = await validarDispositivos(result.user);
-    if (!permitido) {
-      toast("Límite de dispositivos (2) excedido");
-      await registrarIntentoFallido(correo);
-      auth.signOut();
-      return;
-    }
+    await auth.signInWithEmailAndPassword(correo, password.value);
 
   } catch (e) {
     authMsg.textContent = e.message;
   }
 };
 
-// --- REGISTRO EMAIL/PASS ---
+// --- REGISTRO ---
 btnRegistro.onclick = async () => {
   try {
     let correo = email.value.trim().toLowerCase();
 
     if (!correosPermitidos.includes(correo)) {
       toast("ACCESO DENEGADO");
-      await registrarIntentoFallido(correo);
+      registrarIntentoFallido(correo);
       return;
     }
 
-    const result = await auth.createUserWithEmailAndPassword(correo, password.value);
-
-    // Guardar dispositivo al crear usuario
-    await validarDispositivos(result.user);
+    await auth.createUserWithEmailAndPassword(correo, password.value);
 
   } catch (e) {
     authMsg.textContent = e.message;
   }
 };
 
-// --- LOGIN GOOGLE ---
+// --- GOOGLE LOGIN ---
 btnGoogle.onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
 
-    const correo = result.user.email.toLowerCase();
+    let correo = result.user.email.toLowerCase();
 
     if (!correosPermitidos.includes(correo)) {
       toast("ACCESO DENEGADO");
-      await registrarIntentoFallido(correo);
-      auth.signOut();
-      return;
-    }
-
-    const permitido = await validarDispositivos(result.user);
-    if (!permitido) {
-      toast("Límite de dispositivos (2) excedido");
-      await registrarIntentoFallido(correo);
-      auth.signOut();
+      registrarIntentoFallido(correo);
+      await auth.signOut();
       return;
     }
 
@@ -155,14 +145,24 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// --- LOGOUT ---
+// LOGOUT
 btnLogout.onclick = () => auth.signOut();
 
-// --- OBSERVADOR DE SESIÓN ---
-auth.onAuthStateChanged((user) => {
+// SESIÓN
+auth.onAuthStateChanged(async (user) => {
   if (user) {
     authPanel.classList.add("hidden");
     appPanel.classList.remove("hidden");
+
+    // Validar dispositivos en segundo plano
+    validarDispositivos(user).then(permitido => {
+      if (!permitido) {
+        toast("Límite de dispositivos (2) excedido");
+        registrarIntentoFallido(user.email);
+        auth.signOut();
+      }
+    });
+
   } else {
     authPanel.classList.remove("hidden");
     appPanel.classList.add("hidden");
