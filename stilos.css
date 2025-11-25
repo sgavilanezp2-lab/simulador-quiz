@@ -1,91 +1,60 @@
-body {
-    background: #372da6;
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
+/* --- Agrega esto al final de tu stilos.css --- */
+
+/* Ajuste para que el contenedor principal sea un poco más ancho para los controles */
+.app-container {
+    max-width: 600px; /* Hacemos la caja blanca un poco más ancha */
 }
 
-/* HEADER HOLOGRAFICO */
-.holo-header {
+/* Barra de controles superior (selectores y timer) */
+.controls-bar {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 30px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
-    border-bottom: 2px solid #66eaff;
-    box-shadow: 0 0 15px #66eaff55, inset 0 0 10px #66eaff33;
-    overflow: hidden;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.holo-header::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 300%;
-    height: 100%;
-    background: linear-gradient(120deg, transparent 0%, rgba(102, 234, 255, 0.25) 50%, transparent 100%);
-    transform: skewX(-25deg);
-    animation: holo-scan 6s linear infinite;
-    pointer-events: none;
+.selectors-group {
+    display: flex;
+    gap: 5px;
+    flex-grow: 1;
 }
 
-@keyframes holo-scan {
-    0% { left: -150%; }
-    100% { left: 150%; }
+.timer-logout-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
-.holo-header h1 {
-    color: #66eaff;
-    margin: 0;
-    font-size: 1.7rem;
-    text-shadow: 0 0 8px #66eaff, 0 0 14px #44ccee;
-    letter-spacing: 1px;
-    animation: glow-breathe 3s infinite ease-in-out;
-    text-align: center;
-    width: 100%;
+.timer-box {
+    font-weight: bold;
+    color: #1a73e8;
+    font-size: 1.1rem;
 }
 
-@keyframes glow-breathe {
-    0% { opacity: 1; text-shadow: 0 0 8px #66eaff; }
-    50% { opacity: 0.85; text-shadow: 0 0 4px #66eaff; }
-    100% { opacity: 1; text-shadow: 0 0 10px #66eaff; }
+/* Estilo para los botones de acción (Empezar, Guardar...) para que estén en línea */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
 }
 
-.holo-btn {
-    background: transparent;
-    border: 2px solid #66eaff99;
-    color: #66eaff;
-    padding: 10px 18px;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 0 8px #66eaff55;
-    text-shadow: 0 0 6px #66eaff;
-    transition: 0.25s ease;
-    position: relative;
-    overflow: hidden;
+/* Botón de Cerrar Sesión (Rojo) */
+.btn-logout {
+    background-color: #ea4335; /* Rojo Google */
+    color: white;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    margin-top: 0; /* Quitamos el margen superior por defecto de los botones */
+    width: auto; /* Que no ocupe todo el ancho */
+}
+.btn-logout:hover {
+    background-color: #d33828;
 }
 
-.holo-btn::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -120%;
-    width: 250%;
-    height: 100%;
-    background: linear-gradient(120deg, transparent 0%, rgba(102, 234, 255, 0.3) 50%, transparent 100%);
-    transform: skewX(-25deg);
-    transition: 0.5s ease;
-}
-
-.holo-btn:hover::before {
-    left: 120%;
-}
-
-.holo-btn:hover {
-    box-shadow: 0 0 14px #66eaffaa;
-    transform: scale(1.05);
+/* Asegurar que los selects no se estiren demasiado en la barra horizontal */
+.selectors-group select {
+    width: auto;
+    flex-grow: 1;
 }
