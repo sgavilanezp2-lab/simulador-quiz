@@ -1,6 +1,9 @@
-// Configuración: APUNTA A LA CARPETA PREGUNTAS
-const MATERIA_URL = './preguntas/escalabilidad.json';
+// ==========================================
+// CONFIGURACIÓN Y REFERENCIAS
+// ==========================================
+const MATERIA_URL = './preguntas/escalabilidad.json'; // Asegúrate de que esta ruta sea correcta
 const CANTIDAD_EXAMEN = 30;
+const STORAGE_KEY = 'simulador_data_v2'; // Clave única para guardar/cargar
 
 // Referencias DOM
 const startScreen = document.getElementById('startScreen');
@@ -13,15 +16,15 @@ const scoreDisplay = document.getElementById('scoreDisplay');
 const timerEl = document.getElementById('timer');
 const estado = document.getElementById('estado');
 
-// Botones
+// Botones Principales
 const btnEmpezar = document.getElementById('btnEmpezar');
 const btnReview = document.getElementById('btnReview');
-const btnGuardar = document.getElementById('btnGuardar');
-const btnCargar = document.getElementById('btnCargar');
+const btnGuardar = document.getElementById('btnGuardar'); // Botón guardar del menú (si existe)
+const btnCargar = document.getElementById('btnCargar');   // Botón cargar del menú
 const modoSel = document.getElementById('modo');
 const minutosSel = document.getElementById('minutos');
 
-// Variables
+// Variables de Estado
 let banco = [];
 let ronda = [];
 let idx = 0;
@@ -29,7 +32,9 @@ let respuestasUsuario = [];
 let seleccionTemporal = null;
 let interval = null;
 
-// ⭐ CONTADOR DE PREGUNTAS (CREACIÓN AUTOMÁTICA)
+// ==========================================
+// UTILIDADES UI (CONTADOR FLOTANTE)
+// ==========================================
 let divContador = document.getElementById("contadorPreguntas");
 if (!divContador) {
     divContador = document.createElement("div");
@@ -54,21 +59,25 @@ function actualizarContadorPreguntas() {
     divContador.textContent = `Pregunta ${idx + 1} / ${ronda.length}`;
 }
 
-// 1. CARGAR PREGUNTAS
+// ==========================================
+// 1. CARGA DE DATOS (JSON)
+// ==========================================
 async function cargarMateria() {
     try {
         const res = await fetch(MATERIA_URL);
-        if (!res.ok) throw new Error('No encuentro preguntas/escalabilidad.json');
+        if (!res.ok) throw new Error(`No se pudo cargar ${MATERIA_URL}`);
         banco = await res.json();
         return true;
     } catch (e) {
         alert("Error: " + e.message);
-        estado.textContent = "Fallo al cargar preguntas. Verifica la carpeta.";
+        if(estado) estado.textContent = "Fallo al cargar preguntas. Verifica la consola.";
         return false;
     }
 }
 
-// 2. BOTÓN EMPEZAR
+// ==========================================
+// 2. INICIAR QUIZ (NUEVO)
+// ==========================================
 btnEmpezar.onclick = async () => {
     btnEmpezar.disabled = true;
     btnEmpezar.innerText = "Cargando...";
@@ -80,22 +89,72 @@ btnEmpezar.onclick = async () => {
         return;
     }
 
+    // Reiniciar variables para examen nuevo
     respuestasUsuario = [];
     idx = 0;
 
     if (modoSel.value === 'examen') {
+        // Mezclar y cortar
         ronda = banco.sort(() => 0.5 - Math.random()).slice(0, CANTIDAD_EXAMEN);
     } else {
+        // Mezclar todo
         ronda = banco.sort(() => 0.5 - Math.random());
     }
 
-    startScreen.classList.add('hidden');
-    quizContainer.classList.remove('hidden');
-    iniciarTimer();
-    mostrarPregunta();
+    iniciarInterfazQuiz();
 };
 
-// 3. TIMER
+function iniciarInterfazQuiz() {
+    startScreen.classList.add('hidden');
+    quizContainer.classList.remove('hidden');
+    
+    // Restaurar botones si se quedó en "Cargando..."
+    btnEmpezar.disabled = false;
+    btnEmpezar.innerText = "Empezar";
+
+    iniciarTimer();
+    mostrarPregunta();
+}
+
+// ==========================================
+// 3. CARGAR PROGRESO (EXISTENTE)
+// ==========================================
+btnCargar.onclick = () => {
+    const savedData = localStorage.getItem(STORAGE_KEY);
+    
+    if (!savedData) {
+        alert("No hay ningún progreso guardado.");
+        return;
+    }
+
+    try {
+        const data = JSON.parse(savedData);
+        
+        // Restaurar estado
+        ronda = data.ronda || [];
+        respuestasUsuario = data.respuestasUsuario || [];
+        idx = data.idx || 0;
+        
+        // Restaurar configuración visual si se guardó
+        if (data.modo) modoSel.value = data.modo;
+
+        if (ronda.length === 0) {
+            alert("El archivo guardado está vacío o corrupto.");
+            return;
+        }
+
+        alert(`Progreso cargado. Continuando en la pregunta ${idx + 1}.`);
+        iniciarInterfazQuiz();
+
+    } catch (e) {
+        alert("Error al leer el archivo de guardado.");
+        console.error(e);
+    }
+};
+
+// ==========================================
+// 4. TIMER
+// ==========================================
 function iniciarTimer() {
     clearInterval(interval);
     let seg = parseInt(minutosSel.value, 10) * 60;
@@ -123,7 +182,9 @@ function fmt(s) {
     return `${m}:${sec}`;
 }
 
-// 4. RENDERIZAR PREGUNTA
+// ==========================================
+// 5. RENDERIZADO DE PREGUNTAS
+// ==========================================
 function mostrarPregunta() {
     seleccionTemporal = null;
 
@@ -132,23 +193,24 @@ function mostrarPregunta() {
         return;
     }
 
-    actualizarContadorPreguntas(); // ⭐ ACTUALIZAR CONTADOR
-
+    actualizarContadorPreguntas();
     const q = ronda[idx];
 
+    // Generar HTML de la pregunta
     preguntaRender.innerHTML = `
         <h2 class="text-lg font-bold text-gray-800 mb-4">${q.pregunta}</h2>
 
         ${q.imagen ? `
         <div class="flex justify-center mb-4">
-            <img src="${q.imagen}" class="quiz-image">
+            <img src="${q.imagen}" class="quiz-image" style="max-height: 300px; max-width: 100%;">
         </div>` : ''}
 
         <div id="opcionesBox" class="flex flex-col gap-2"></div>
 
-        <div id="studyLocalControls" class="hidden mt-4 flex gap-3">
-            <button id="btnGuardarLocal" class="text-xs text-gray-500 underline hover:text-blue-600">Guardar progreso local</button>
-            <button id="btnCargarLocal" class="text-xs text-gray-500 underline hover:text-blue-600">Cargar progreso local</button>
+        <div id="studyLocalControls" class="mt-4 flex gap-3 hidden">
+            <button id="btnGuardarProgreso" class="text-xs text-blue-600 underline cursor-pointer">
+                💾 Guardar progreso actual y salir
+            </button>
         </div>
 
         <div class="mt-6 flex justify-end">
@@ -158,112 +220,107 @@ function mostrarPregunta() {
         </div>
     `;
 
+    // Generar Opciones
     const opcionesBox = document.getElementById('opcionesBox');
-
     q.opciones.forEach((op, i) => {
         const btn = document.createElement('button');
         btn.className = "opt";
         btn.textContent = op;
+        
+        // Si ya respondimos esta pregunta anteriormente (al cargar), marcarla
+        if (respuestasUsuario[idx] !== undefined && respuestasUsuario[idx] === i) {
+             btn.classList.add('option-selected');
+        }
+        
         btn.onclick = () => seleccionar(i, btn);
         opcionesBox.appendChild(btn);
     });
 
-    const studyLocalControls = document.getElementById('studyLocalControls');
-    if (modoSel.value === "estudio") {
-        studyLocalControls.classList.remove('hidden');
-    } else {
-        studyLocalControls.classList.add('hidden');
-    }
-
-    const btnGuardarLocal = document.getElementById('btnGuardarLocal');
-    const btnCargarLocal = document.getElementById('btnCargarLocal');
-
-    if (btnGuardarLocal) {
-        btnGuardarLocal.onclick = () => {
-            if (modoSel.value !== "estudio") {
-                alert("Solo puedes guardar en modo estudio.");
-                return;
-            }
-            const state = { ronda, idx, respuestasUsuario };
-            localStorage.setItem("simulador_local", JSON.stringify(state));
-            alert("Progreso guardado localmente.");
-        };
-    }
-
-    if (btnCargarLocal) {
-        btnCargarLocal.onclick = () => {
-            const data = JSON.parse(localStorage.getItem("simulador_local"));
-            if (!data) {
-                alert("No hay progreso guardado localmente.");
-                return;
-            }
-
-            ronda = data.ronda || [];
-            idx = typeof data.idx === 'number' ? data.idx : 0;
-            respuestasUsuario = data.respuestasUsuario || [];
-
-            startScreen.classList.add('hidden');
-            quizContainer.classList.remove('hidden');
-            iniciarTimer();
-            mostrarPregunta();
-
-            alert("Progreso cargado.");
-        };
-    }
-
+    // Configurar botón "Siguiente"
     document.getElementById('btnSiguiente').onclick = avanzar;
+
+    // Configurar botón "Guardar" (Visible en modo estudio)
+    const studyControls = document.getElementById('studyLocalControls');
+    if (modoSel.value === "estudio") {
+        studyControls.classList.remove('hidden');
+        
+        document.getElementById('btnGuardarProgreso').onclick = () => {
+            const estadoGuardar = {
+                ronda: ronda,
+                idx: idx,
+                respuestasUsuario: respuestasUsuario,
+                modo: modoSel.value
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(estadoGuardar));
+            alert("✅ Progreso guardado.\n\nPuedes cerrar la página. Cuando vuelvas, usa el botón 'Cargar Progreso' en el inicio.");
+        };
+    }
 }
 
-// ⭐ RETROALIMENTACIÓN INMEDIATA EN MODO ESTUDIO
+// ==========================================
+// 6. LÓGICA DE RESPUESTA
+// ==========================================
 function seleccionar(index, btnRef) {
     const q = ronda[idx];
     const all = document.querySelectorAll('#opcionesBox button');
     const btnNext = document.getElementById('btnSiguiente');
 
+    // Limpiar estilos previos
     all.forEach(b => b.classList.remove('option-selected', 'ans-correct', 'ans-wrong'));
 
     seleccionTemporal = index;
 
     if (modoSel.value === "estudio") {
-
+        // Modo Estudio: Feedback inmediato
         if (index === q.respuesta) {
             btnRef.classList.add("ans-correct");
         } else {
             btnRef.classList.add("ans-wrong");
+            // Mostrar la correcta
             if (all[q.respuesta]) all[q.respuesta].classList.add("ans-correct");
         }
 
+        // Mostrar explicación si existe
         if (q.explicacion) {
-            const box = document.createElement("div");
-            box.className = "bg-blue-50 border border-blue-200 p-3 rounded mt-3 text-sm text-blue-800";
-            box.innerHTML = `<b>Explicación:</b> ${q.explicacion}`;
-            preguntaRender.appendChild(box);
+            // Evitar duplicados
+            if (!preguntaRender.querySelector('.explanation-box')) {
+                const box = document.createElement("div");
+                box.className = "explanation-box bg-blue-50 border border-blue-200 p-3 rounded mt-3 text-sm text-blue-800";
+                box.innerHTML = `<b>Explicación:</b> ${q.explicacion}`;
+                preguntaRender.appendChild(box);
+            }
         }
-
-        btnNext.disabled = false;
-        btnNext.style.opacity = "1";
-
-        return;
+    } else {
+        // Modo Examen: Solo marcar selección
+        btnRef.classList.add('option-selected');
     }
 
-    btnRef.classList.add('option-selected');
     btnNext.disabled = false;
     btnNext.style.opacity = "1";
 }
 
-// CONTINUAR
 function avanzar() {
     if (seleccionTemporal === null) return;
-    respuestasUsuario.push(seleccionTemporal);
+
+    // Guardar respuesta en el array
+    // Si estamos re-visitando una pregunta, actualizamos la respuesta
+    respuestasUsuario[idx] = seleccionTemporal;
+
     idx++;
     mostrarPregunta();
 }
 
-function finalizarQuiz(tiempo) {
+// ==========================================
+// 7. FINALIZACIÓN Y REVISIÓN
+// ==========================================
+function finalizarQuiz(tiempoTerminado) {
     clearInterval(interval);
     quizContainer.classList.add('hidden');
     resultScreen.classList.remove('hidden');
     divContador.style.display = "none";
+    
+    // Opcional: Borrar el progreso guardado al terminar para limpiar
+    localStorage.removeItem(STORAGE_KEY);
 
     let aciertos = 0;
     ronda.forEach((p, i) => {
@@ -272,10 +329,9 @@ function finalizarQuiz(tiempo) {
 
     scoreDisplay.textContent = `${aciertos} / ${ronda.length}`;
 
-    if (tiempo) alert("Tiempo terminado.");
+    if (tiempoTerminado) alert("¡Se acabó el tiempo!");
 }
 
-// 5. REVISIÓN
 btnReview.onclick = () => {
     resultScreen.classList.add('hidden');
     reviewContainer.classList.remove('hidden');
@@ -285,49 +341,55 @@ btnReview.onclick = () => {
 
     ronda.forEach((p, i) => {
         const userAns = respuestasUsuario[i];
-        const ok = (userAns === p.respuesta);
+        const isCorrect = (userAns === p.respuesta);
 
         const card = document.createElement('div');
         card.className = "bg-white p-4 rounded border shadow-sm mb-4";
 
-        let html = `<p class="font-bold mb-2">${i + 1}. ${p.pregunta}</p>`;
+        let html = `<p class="font-bold mb-2 text-gray-800">${i + 1}. ${p.pregunta}</p>`;
 
-        if (p.imagen) html += `<img src="${p.imagen}" class="quiz-image" style="max-height:150px;">`;
+        if (p.imagen) {
+            html += `<img src="${p.imagen}" class="quiz-image mb-2" style="max-height:150px;">`;
+        }
 
         p.opciones.forEach((op, k) => {
-            let cls = "";
-            if (k === p.respuesta) cls = "ans-correct";
-            else if (k === userAns && !ok) cls = "ans-wrong";
-            else if (k === userAns) cls = "option-selected";
+            let cls = "border border-gray-200 text-gray-700"; // Estilo base
+            
+            // Lógica de colores para revisión
+            if (k === p.respuesta) {
+                cls = "bg-green-100 border-green-500 text-green-800 font-semibold"; // Correcta oficial
+            } else if (k === userAns && !isCorrect) {
+                cls = "bg-red-100 border-red-500 text-red-800"; // Error del usuario
+            } else if (k === userAns && isCorrect) {
+                cls = "bg-green-100 border-green-500 text-green-800 font-semibold"; // Acierto del usuario
+            }
 
-            html += `<div class="p-2 rounded border mb-1 ${cls}">${op}</div>`;
+            html += `<div class="p-2 rounded mb-1 ${cls}">${op}</div>`;
         });
 
-        if (p.explicacion)
-            html += `<div class="text-xs text-gray-500 mt-2 italic bg-gray-100 p-2">Nota: ${p.explicacion}</div>`;
+        if (p.explicacion) {
+            html += `<div class="text-xs text-gray-500 mt-2 italic bg-gray-50 p-2 rounded">Nota: ${p.explicacion}</div>`;
+        }
 
         card.innerHTML = html;
         reviewContainer.appendChild(card);
     });
 };
 
-// Guardado
-const KEY = 'simulador_data';
-
-btnGuardar.onclick = () => {
-    localStorage.setItem(KEY, JSON.stringify({ ronda, respuestasUsuario, idx }));
-    alert("Guardado.");
-};
-
-btnCargar.onclick = () => {
-    const d = JSON.parse(localStorage.getItem(KEY));
-    if (d) {
-        ronda = d.ronda;
-        respuestasUsuario = d.respuestasUsuario;
-        idx = d.idx;
-        startScreen.classList.add('hidden');
-        quizContainer.classList.remove('hidden');
-        iniciarTimer();
-        mostrarPregunta();
-    } else alert("No hay datos.");
-};
+// Guardado manual desde botón externo (si existe en tu HTML)
+if (btnGuardar) {
+    btnGuardar.onclick = () => {
+        // Solo guarda si hay una ronda activa
+        if(ronda.length === 0) {
+            alert("No hay un examen activo para guardar.");
+            return;
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ 
+            ronda, 
+            respuestasUsuario, 
+            idx,
+            modo: modoSel.value 
+        }));
+        alert("Guardado global exitoso.");
+    };
+}
