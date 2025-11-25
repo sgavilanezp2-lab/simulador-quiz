@@ -1,15 +1,20 @@
-/* FONDO AZUL OSCURO (ESTILO AMIGO) */
+/* =========================================
+   1. ESTILOS BASE (FONDO GRIS CLARO LIMPIO)
+   ========================================= */
 body {
-    background: #372da6; 
+    background-color: #f3f4f6; /* Gris suave profesional */
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 100vh;
 }
 
-/* HEADER HOLOGRÁFICO */
+/* =========================================
+   2. HEADER HOLOGRÁFICO (MANTENIDO IGUAL)
+   ========================================= */
 .holo-header {
     width: 100%;
     display: flex;
@@ -23,52 +28,106 @@ body {
     top: 0;
     z-index: 100;
 }
-.holo-header h1 { color: #66eaff; margin: 0; font-size: 1.4rem; text-shadow: 0 0 8px #66eaff; flex-grow: 1; text-align: center; }
-.holo-btn { background: transparent; border: 1px solid #66eaff; color: #66eaff; padding: 5px 15px; border-radius: 4px; }
 
-/* CONTENEDOR DE LA TARJETA BLANCA */
-.app-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    width: 90%;
-    max-width: 500px; /* Ancho controlado como tu foto */
-    margin: 40px auto;
-    padding: 30px;
-    position: relative;
+.holo-header h1 {
+    color: #66eaff;
+    margin: 0;
+    font-size: 1.4rem;
+    text-shadow: 0 0 8px #66eaff;
     text-align: center;
+    flex-grow: 1;
 }
 
-/* BOTÓN CERRAR SESIÓN */
-.top-actions { width: 90%; max-width: 500px; display: flex; justify-content: flex-end; margin-top: 20px; }
-.btn-logout { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+.holo-btn {
+    background: transparent;
+    border: 1px solid #66eaff;
+    color: #66eaff;
+    padding: 5px 15px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: default;
+}
 
-/* CONTROLES DEL FORMULARIO (Input, Select) */
+/* =========================================
+   3. BOTÓN CERRAR SESIÓN (FLOTANTE EXTERNO)
+   ========================================= */
+.logout-container {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 15px;
+    padding-right: 10px;
+}
+
+#btnLogout {
+    background-color: #ef4444; /* Rojo */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+}
+#btnLogout:hover { background-color: #dc2626; }
+
+/* =========================================
+   4. TARJETA BLANCA CENTRAL
+   ========================================= */
+.app-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Sombra suave */
+    border: 1px solid #e5e7eb;
+    width: 90%;
+    max-width: 450px; /* Ancho controlado */
+    margin: 10px auto 40px auto;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+
+/* Inputs y Selects */
 .input-group { text-align: left; margin-bottom: 15px; }
 .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 5px; }
-.input-box { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font-size: 0.95rem; }
+.input-box { 
+    width: 100%; padding: 10px; 
+    border: 1px solid #ddd; border-radius: 8px; 
+    background: #fff; font-size: 0.95rem; color: #333;
+}
+.input-box:focus { outline: 2px solid #1a73e8; border-color: transparent; }
 
-/* BOTONES */
-.google-btn { width: 100%; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-weight: 500; }
-.btn-start { width: 100%; background: #1a73e8; color: white; border: none; padding: 12px; border-radius: 25px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; }
-.btn-start:hover { background: #1557b0; }
+/* Botón Google */
+.google-btn {
+    width: 100%; background: white; border: 1px solid #ccc;
+    padding: 12px; border-radius: 50px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer; font-weight: 500; color: #444;
+}
+.google-btn:hover { background-color: #f9fafb; }
 
-.sub-actions { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-.link-btn { background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; font-size: 0.85rem; }
+/* Botón Empezar */
+.btn-start {
+    width: 100%; background-color: #1a73e8; color: white;
+    font-weight: bold; padding: 12px; border-radius: 25px;
+    border: none; font-size: 1rem; cursor: pointer; margin-top: 15px;
+    box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2);
+}
+.btn-start:hover { background-color: #1557b0; }
 
-/* ESTILOS QUIZ */
+/* Textos de estado */
+.user-info { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
 .hidden { display: none !important; }
-.timer-display { font-family: monospace; font-size: 1.2rem; color: #1a73e8; font-weight: bold; text-align: right; margin-bottom: 10px; }
-.quiz-image { max-width: 100%; border-radius: 8px; border: 1px solid #eee; margin: 10px auto; display: block; }
 
-/* RESPUESTAS */
-.opt { width: 100%; text-align: left; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+/* Estilos del Quiz (Preguntas) */
+.quiz-image { max-width: 100%; border-radius: 8px; border: 1px solid #eee; margin: 10px auto; display: block; }
+.opt { width: 100%; text-align: left; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
 .opt:hover:not(:disabled) { background: #f0f9ff; border-color: #1a73e8; }
 .option-selected { background: #e0e7ff !important; border: 2px solid #4f46e5 !important; font-weight: bold; }
 .ans-correct { background: #dcfce7 !important; border: 2px solid #22c55e !important; color: #14532d; }
 .ans-wrong { background: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #7f1d1d; text-decoration: line-through; }
-
 .btn-action { padding: 8px 20px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; }
-.btn-action.yellow { background: #eab308; }
-.btn-action.gray { background: #4b5563; }
-.btn-action.blue { background: #1a73e8; }
+.yellow { background: #eab308; } .gray { background: #4b5563; } .blue { background: #1a73e8; }
