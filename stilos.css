@@ -1,25 +1,182 @@
-/* --- Agrega esto al final de tu stilos.css --- */
-
-/* Ajuste para que el contenedor principal sea un poco más ancho para los controles */
-.app-container {
-    max-width: 600px; /* Hacemos la caja blanca un poco más ancha */
+/* =========================================
+   1. ESTILOS BASE Y FONDO (DISEÑO AMIGO)
+   ========================================= */
+body {
+    background: #372da6; /* Fondo azul oscuro original */
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
 }
 
-/* Barra de controles superior (selectores y timer) */
+/* =========================================
+   2. HEADER HOLOGRÁFICO (INTACTO)
+   ========================================= */
+.holo-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 30px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+    border-bottom: 2px solid #66eaff;
+
+    /* Brillo holográfico */
+    box-shadow: 0 0 15px #66eaff55, inset 0 0 10px #66eaff33;
+    overflow: hidden;
+}
+
+.holo-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 300%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent 0%,
+        rgba(102, 234, 255, 0.25) 50%,
+        transparent 100%
+    );
+    transform: skewX(-25deg);
+    animation: holo-scan 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes holo-scan {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+.holo-header h1 {
+    color: #66eaff;
+    margin: 0;
+    font-size: 1.5rem; /* Ajustado un poco para móviles */
+    text-shadow: 0 0 8px #66eaff, 0 0 14px #44ccee;
+    letter-spacing: 1px;
+    animation: glow-breathe 3s infinite ease-in-out;
+    text-align: center;
+    flex-grow: 1;
+}
+
+@keyframes glow-breathe {
+    0% { opacity: 1; text-shadow: 0 0 8px #66eaff; }
+    50% { opacity: 0.85; text-shadow: 0 0 4px #66eaff; }
+    100% { opacity: 1; text-shadow: 0 0 10px #66eaff; }
+}
+
+.holo-btn {
+    background: transparent;
+    border: 2px solid #66eaff99;
+    color: #66eaff;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 8px #66eaff55;
+    text-shadow: 0 0 6px #66eaff;
+    transition: 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.holo-btn:hover {
+    box-shadow: 0 0 14px #66eaffaa;
+    transform: scale(1.05);
+}
+
+/* =========================================
+   3. CONTENEDOR PRINCIPAL (TARJETA BLANCA)
+   ========================================= */
+.container {
+    width: 90%;
+    max-width: 500px; /* Ancho por defecto para Login */
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    margin-top: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+    transition: max-width 0.3s ease;
+}
+
+/* Cuando mostramos la App, hacemos el contenedor más ancho */
+.app-container {
+    max-width: 800px; 
+}
+
+h2 { margin-top: 0; color: #333; }
+p { color: #666; }
+
+.hidden { display: none !important; }
+
+/* =========================================
+   4. BOTONES Y CONTROLES GENERALES
+   ========================================= */
+button {
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+/* Botón Google del Login */
+#btnGoogle {
+    background-color: white;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+}
+#btnGoogle:hover { background-color: #f8f9fa; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+/* Inputs y Selects */
+select, input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    font-size: 0.95rem;
+}
+
+/* =========================================
+   5. BARRA DE CONTROLES DE LA APP
+   ========================================= */
 .controls-bar {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
 }
 
 .selectors-group {
     display: flex;
-    gap: 5px;
+    gap: 8px;
     flex-grow: 1;
 }
+.selectors-group select { width: 100%; }
 
 .timer-logout-group {
     display: flex;
@@ -30,31 +187,101 @@
 .timer-box {
     font-weight: bold;
     color: #1a73e8;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    min-width: 60px;
 }
 
-/* Estilo para los botones de acción (Empezar, Guardar...) para que estén en línea */
+/* BOTÓN CERRAR SESIÓN (ROJO) */
+.btn-logout {
+    background-color: #ea4335;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+.btn-logout:hover { background-color: #d33828; }
+
+/* BOTONES DE ACCIÓN (EMPEZAR, GUARDAR...) */
 .action-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
 }
 
-/* Botón de Cerrar Sesión (Rojo) */
-.btn-logout {
-    background-color: #ea4335; /* Rojo Google */
+.btn-primary {
+    background-color: #1a73e8;
     color: white;
-    padding: 8px 15px;
-    font-size: 0.85rem;
-    margin-top: 0; /* Quitamos el margen superior por defecto de los botones */
-    width: auto; /* Que no ocupe todo el ancho */
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
 }
-.btn-logout:hover {
-    background-color: #d33828;
+.btn-primary:hover { background-color: #1557b0; }
+
+.btn-secondary {
+    background-color: #f1f3f4;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+.btn-secondary:hover { background-color: #e8eaed; }
+
+/* =========================================
+   6. ESTILOS DEL QUIZ (PREGUNTAS)
+   ========================================= */
+#contenedor {
+    margin-top: 20px;
+    text-align: left;
 }
 
-/* Asegurar que los selects no se estiren demasiado en la barra horizontal */
-.selectors-group select {
-    width: auto;
-    flex-grow: 1;
+/* Imágenes de topología */
+.quiz-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin: 15px 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Opciones de respuesta */
+.opt {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+.opt:hover:not(:disabled) {
+    background-color: #e8f0fe;
+    border-color: #1a73e8;
+}
+
+/* Estados de las respuestas (Verde/Rojo) */
+.option-selected {
+    background-color: #e8f0fe !important;
+    border: 2px solid #1a73e8 !important;
+    font-weight: bold;
+}
+
+.ans-correct {
+    background-color: #d1e7dd !important;
+    border-color: #0f5132 !important;
+    color: #0f5132;
+}
+
+.ans-wrong {
+    background-color: #f8d7da !important;
+    border-color: #842029 !important;
+    color: #842029;
+    text-decoration: line-through;
 }
