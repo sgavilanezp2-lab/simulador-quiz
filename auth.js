@@ -5,7 +5,10 @@ const correosPermitidos = [
   "jzamoram9@unemi.edu.ec", "fcarrillop@unemi.edu.ec", "naguilarb@unemi.edu.ec",
   "ehidalgoc4@unemi.edu.ec", "lbrionesg3@unemi.edu.ec", "xsalvadorv@unemi.edu.ec",
   "nbravop4@unemi.edu.ec", "jmoreirap6@unemi.edu.ec", "kholguinb2@unemi.edu.ec",
-  "jcastrof8@unemi.edu.ec", "apoyochat.trabajosocial@gmail.com"
+  "jcastrof8@unemi.edu.ec",
+
+  // Gmail añadido
+  "apoyochat.trabajosocial@gmail.com"
 ];
 
 // Referencias
@@ -13,7 +16,7 @@ const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
 const authMsg = document.getElementById("authMsg");
 const btnGoogle = document.getElementById("btnGoogle");
-const btnLogout = document.getElementById("btnLogoutHeader"); // Referencia al botón integrado
+const btnLogout = document.getElementById("btnLogoutHeader"); 
 
 // ID Dispositivo
 function getDeviceId() {
@@ -68,15 +71,12 @@ btnGoogle.onclick = async () => {
     const result = await auth.signInWithPopup(provider);
     let correo = result.user.email.toLowerCase();
 
-    // ⛔ NUEVA VALIDACIÓN PEDIDA
-    const estaEnLista = correosPermitidos.includes(correo);
-
-if (!estaEnLista) {
-  await auth.signOut();
-  authMsg.textContent = "Correo no autorizado.";
-  return;
-}
-
+    // Validación final
+    if (!correosPermitidos.includes(correo)) {
+      await auth.signOut();
+      authMsg.textContent = "Correo no autorizado.";
+      return;
+    }
 
   } catch (e) {
     authMsg.textContent = e.message;
@@ -94,43 +94,35 @@ if (btnLogout) {
 auth.onAuthStateChanged(async (user) => {
   if (user) {
 
-    // ⛔ BLOQUEO EXTRA (por si omiten el popup)
+    // Validación reforzada (solo si está en la lista, sin dominio obligatorio)
     const correo = user.email.toLowerCase();
-    const dominioCorrecto = correo.endsWith("@unemi.edu.ec");
     const estaEnLista = correosPermitidos.includes(correo);
 
-    if (!(dominioCorrecto && estaEnLista)) {
+    if (!estaEnLista) {
       alert("Tu cuenta no está autorizada para acceder al simulador.");
       await auth.signOut();
       return;
     }
-    // -------------------------------------------
 
     authPanel.classList.add("hidden");
-    
     const validacion = await validarSeguridad(user);
 
     if (validacion.permitido) {
-      // ÉXITO: Mostrar App y Botón
       appPanel.classList.remove("hidden");
       if(btnLogout) btnLogout.classList.remove("hidden"); 
       
-      // ******* SOLUCIÓN DE REGRESIÓN: FORZAR DATOS *******
       const userEmailDisplay = document.getElementById("userEmailDisplay");
       const verificationMsg = document.getElementById("verificationMsg");
       
       if(userEmailDisplay) userEmailDisplay.textContent = user.email;
       if(verificationMsg) verificationMsg.classList.remove("hidden"); 
-      // ***************************************************
 
     } else {
-      // FALLO
       alert(validacion.msg);
       await auth.signOut();
       window.location.reload();
     }
   } else {
-    // NO HAY USUARIO
     authPanel.classList.remove("hidden");
     appPanel.classList.add("hidden");
     if(btnLogout) btnLogout.classList.add("hidden"); 
