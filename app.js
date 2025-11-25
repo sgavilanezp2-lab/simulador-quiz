@@ -1,314 +1,138 @@
-// Configuración: APUNTA A LA CARPETA PREGUNTAS
-const MATERIA_URL = './preguntas/escalabilidad.json';
-const CANTIDAD_EXAMEN = 30;
+// ================================
+//   VARIABLES GLOBALES
+// ================================
+let preguntas = [];
+let preguntasEstudio = [];
+let indicePreguntaActual = 0;
+let modoEstudio = false;
 
-// Referencias DOM
-const startScreen = document.getElementById('startScreen');
-const quizContainer = document.getElementById('quizContainer');
-const preguntaRender = document.getElementById('preguntaRender');
-const resultScreen = document.getElementById('resultScreen');
-const reviewContainer = document.getElementById('reviewContainer');
-const reviewActions = document.getElementById('reviewActions');
-const scoreDisplay = document.getElementById('scoreDisplay');
-const timerEl = document.getElementById('timer');
-const estado = document.getElementById('estado');
+// Elementos
+const contenedorPregunta = document.getElementById("pregunta");
+const contenedorOpciones = document.getElementById("opciones");
+const btnSiguiente = document.getElementById("btnSiguiente");
+const btnGuardar = document.getElementById("btnGuardar");
+const btnCargar = document.getElementById("btnCargar");
 
-// Botones
-const btnEmpezar = document.getElementById('btnEmpezar');
-const btnReview = document.getElementById('btnReview');
-const btnGuardar = document.getElementById('btnGuardar');
-const btnCargar = document.getElementById('btnCargar');
-const modoSel = document.getElementById('modo');
-const minutosSel = document.getElementById('minutos');
+// NUEVOS: Indicadores de progreso
+const indicadorNumero = document.getElementById("indicadorNumero");
+const indicadorRestantes = document.getElementById("indicadorRestantes");
 
-// Variables
-let banco = [];
-let ronda = [];
-let idx = 0;
-let respuestasUsuario = [];
-let seleccionTemporal = null;
-let interval = null;
+// ================================
+//   CARGAR ARCHIVO JSON
+// ================================
+fetch("preguntas.json")
+    .then(res => res.json())
+    .then(data => {
+        preguntas = data;
+        console.log("Preguntas cargadas:", preguntas.length);
+    })
+    .catch(err => console.error("Error cargando JSON:", err));
 
-// 1. CARGAR PREGUNTAS
-async function cargarMateria() {
-    try {
-        const res = await fetch(MATERIA_URL);
-        if (!res.ok) throw new Error('No encuentro preguntas/escalabilidad.json');
-        banco = await res.json();
-        return true;
-    } catch (e) {
-        alert("Error: " + e.message);
-        estado.textContent = "Fallo al cargar preguntas. Verifica la carpeta.";
-        return false;
-    }
-}
+// ================================
+//   INICIAR MODO ESTUDIO
+// ================================
+function iniciarModoEstudio() {
+    modoEstudio = true;
+    preguntasEstudio = [...preguntas]; // copia
+    indicePreguntaActual = 0;
 
-// 2. BOTÓN EMPEZAR
-btnEmpezar.onclick = async () => {
-    btnEmpezar.disabled = true;
-    btnEmpezar.innerText = "Cargando...";
+    btnGuardar.style.display = "inline-block";
+    btnCargar.style.display = "inline-block";
 
-    const exito = await cargarMateria();
-    if (!exito) {
-        btnEmpezar.disabled = false;
-        btnEmpezar.innerText = "Reintentar";
-        return;
-    }
-
-    respuestasUsuario = [];
-    idx = 0;
-
-    if (modoSel.value === 'examen') {
-        ronda = banco.sort(() => 0.5 - Math.random()).slice(0, CANTIDAD_EXAMEN);
-    } else {
-        ronda = banco.sort(() => 0.5 - Math.random());
-    }
-
-    startScreen.classList.add('hidden');
-    quizContainer.classList.remove('hidden');
-    iniciarTimer();
     mostrarPregunta();
-};
-
-// 3. TIMER
-function iniciarTimer() {
-    clearInterval(interval);
-    let seg = parseInt(minutosSel.value, 10) * 60;
-
-    if (seg <= 0) {
-        timerEl.textContent = '∞';
-        return;
-    }
-
-    timerEl.textContent = fmt(seg);
-
-    interval = setInterval(() => {
-        seg--;
-        timerEl.textContent = fmt(seg);
-        if (seg <= 0) {
-            clearInterval(interval);
-            finalizarQuiz(true);
-        }
-    }, 1000);
 }
 
-function fmt(s) {
-    const m = Math.floor(s / 60).toString().padStart(2, '0');
-    const sec = (s % 60).toString().padStart(2, '0');
-    return `${m}:${sec}`;
-}
-
-// 4. RENDERIZAR PREGUNTA
+// ================================
+//   MOSTRAR PREGUNTA
+// ================================
 function mostrarPregunta() {
-    seleccionTemporal = null;
-
-    if (idx >= ronda.length) {
-        finalizarQuiz(false);
+    if (indicePreguntaActual >= preguntasEstudio.length) {
+        contenedorPregunta.textContent = "¡Has terminado todas las preguntas!";
+        contenedorOpciones.innerHTML = "";
+        btnSiguiente.style.display = "none";
         return;
     }
 
-    const q = ronda[idx];
+    let preguntaActual = preguntasEstudio[indicePreguntaActual];
 
-    // Inserto los botones locales DEBAJO de las opciones (se generarán en cada pregunta)
-    preguntaRender.innerHTML = `
-        <h2 class="text-lg font-bold text-gray-800 mb-4">${q.pregunta}</h2>
+    contenedorPregunta.textContent = preguntaActual.pregunta;
+    contenedorOpciones.innerHTML = "";
 
-        ${q.imagen ? `
-        <div class="flex justify-center mb-4">
-            <img src="${q.imagen}" class="quiz-image">
-        </div>` : ''}
-
-        <div id="opcionesBox" class="flex flex-col gap-2"></div>
-
-        <!-- BOTONES DE GUARDADO LOCAL (se muestran solo en modo estudio) -->
-        <div id="studyLocalControls" class="hidden mt-4 flex gap-3">
-            <button id="btnGuardarLocal" class="text-xs text-gray-500 underline hover:text-blue-600">Guardar progreso local</button>
-            <button id="btnCargarLocal" class="text-xs text-gray-500 underline hover:text-blue-600">Cargar progreso local</button>
-        </div>
-
-        <div class="mt-6 flex justify-end">
-            <button id="btnSiguiente" class="btn-start" style="width:auto; padding:8px 25px; opacity:0.5;" disabled>
-                ${idx === ronda.length - 1 ? 'Finalizar' : 'Siguiente'}
-            </button>
-        </div>
-    `;
-
-    const opcionesBox = document.getElementById('opcionesBox');
-
-    q.opciones.forEach((op, i) => {
-        const btn = document.createElement('button');
-        btn.className = "opt";
+    preguntaActual.opciones.forEach((op, index) => {
+        let btn = document.createElement("button");
+        btn.classList.add("opcion");
         btn.textContent = op;
-        btn.onclick = () => seleccionar(i, btn);
-        opcionesBox.appendChild(btn);
+        btn.onclick = () => verificarRespuesta(index);
+        contenedorOpciones.appendChild(btn);
     });
 
-    // Mostrar/ocultar controles locales según modo
-    const studyLocalControls = document.getElementById('studyLocalControls');
-    if (modoSel.value === "estudio") {
-        studyLocalControls.classList.remove('hidden');
-    } else {
-        studyLocalControls.classList.add('hidden');
-    }
-
-    // Conectar listeners de guardado/carga local (se re-conectan cada render)
-    const btnGuardarLocal = document.getElementById('btnGuardarLocal');
-    const btnCargarLocal = document.getElementById('btnCargarLocal');
-
-    if (btnGuardarLocal) {
-        btnGuardarLocal.onclick = () => {
-            if (modoSel.value !== "estudio") {
-                alert("Solo puedes guardar en modo estudio.");
-                return;
-            }
-            const state = { ronda, idx, respuestasUsuario };
-            localStorage.setItem("simulador_local", JSON.stringify(state));
-            alert("Progreso guardado localmente.");
-        };
-    }
-
-    if (btnCargarLocal) {
-        btnCargarLocal.onclick = () => {
-            const data = JSON.parse(localStorage.getItem("simulador_local"));
-            if (!data) {
-                alert("No hay progreso guardado localmente.");
-                return;
-            }
-
-            // Restaurar estado guardado
-            ronda = data.ronda || [];
-            idx = typeof data.idx === 'number' ? data.idx : 0;
-            respuestasUsuario = data.respuestasUsuario || [];
-
-            // Mostrar quiz en el estado cargado
-            startScreen.classList.add('hidden');
-            quizContainer.classList.remove('hidden');
-            if (modoSel.value === "estudio") studyLocalControls.classList.remove('hidden');
-            iniciarTimer(); // reinicia timer según el select actual (no guarda tiempo restante)
-            mostrarPregunta();
-
-            alert("Progreso cargado.");
-        };
-    }
-
-    document.getElementById('btnSiguiente').onclick = avanzar;
+    // ACTUALIZAR INDICADORES
+    actualizarIndicadores();
 }
 
-// ⭐⭐⭐ RETROALIMENTACIÓN INMEDIATA EN MODO ESTUDIO ⭐⭐⭐
-function seleccionar(index, btnRef) {
-    const q = ronda[idx];
-    const all = document.querySelectorAll('#opcionesBox button');
-    const btnNext = document.getElementById('btnSiguiente');
+// ================================
+//   VERIFICACIÓN
+// ================================
+function verificarRespuesta(indiceSeleccionado) {
+    let correcta = preguntasEstudio[indicePreguntaActual].respuestaCorrecta;
 
-    all.forEach(b => b.classList.remove('option-selected', 'ans-correct', 'ans-wrong'));
+    let botones = document.querySelectorAll(".opcion");
 
-    seleccionTemporal = index;
+    botones.forEach((btn, i) => {
+        if (i === correcta) btn.classList.add("correcta");
+        if (i === indiceSeleccionado && i !== correcta) btn.classList.add("incorrecta");
+        btn.disabled = true;
+    });
 
-    // ⭐ MODO ESTUDIO → RETROALIMENTACIÓN INMEDIATA
-    if (modoSel.value === "estudio") {
+    btnSiguiente.style.display = "inline-block";
+}
 
-        if (index === q.respuesta) {
-            btnRef.classList.add("ans-correct");
-        } else {
-            btnRef.classList.add("ans-wrong");
-            if (all[q.respuesta]) all[q.respuesta].classList.add("ans-correct");
-        }
+// ================================
+//   SIGUIENTE PREGUNTA
+// ================================
+btnSiguiente.onclick = () => {
+    indicePreguntaActual++;
+    btnSiguiente.style.display = "none";
+    mostrarPregunta();
+};
 
-        if (q.explicacion) {
-            const box = document.createElement("div");
-            box.className = "bg-blue-50 border border-blue-200 p-3 rounded mt-3 text-sm text-blue-800";
-            box.innerHTML = `<b>Explicación:</b> ${q.explicacion}`;
-            preguntaRender.appendChild(box);
-        }
+// ================================
+//   GUARDAR PROGRESO LOCAL
+// ================================
+btnGuardar.onclick = () => {
+    const progreso = {
+        indice: indicePreguntaActual,
+        preguntasEstudio: preguntasEstudio
+    };
+    localStorage.setItem("progresoEstudio", JSON.stringify(progreso));
+    alert("Progreso guardado localmente.");
+};
 
-        btnNext.disabled = false;
-        btnNext.style.opacity = "1";
-
+// ================================
+//   CARGAR PROGRESO LOCAL
+// ================================
+btnCargar.onclick = () => {
+    const guardado = localStorage.getItem("progresoEstudio");
+    if (!guardado) {
+        alert("No hay progreso guardado.");
         return;
     }
 
-    // ⭐ MODO EXAMEN → SIN RETROALIMENTACIÓN
-    btnRef.classList.add('option-selected');
-    btnNext.disabled = false;
-    btnNext.style.opacity = "1";
-}
+    const progreso = JSON.parse(guardado);
+    indicePreguntaActual = progreso.indice;
+    preguntasEstudio = progreso.preguntasEstudio;
 
-// CONTINUAR
-function avanzar() {
-    if (seleccionTemporal === null) return;
-    respuestasUsuario.push(seleccionTemporal);
-    idx++;
+    alert("Progreso cargado.");
     mostrarPregunta();
+};
+
+// ================================
+//   ACTUALIZAR INDICADORES
+// ================================
+function actualizarIndicadores() {
+    indicadorNumero.textContent =
+        `Pregunta: ${indicePreguntaActual + 1} / ${preguntasEstudio.length}`;
+
+    indicadorRestantes.textContent =
+        `Restantes: ${preguntasEstudio.length - (indicePreguntaActual + 1)}`;
 }
-
-function finalizarQuiz(tiempo) {
-    clearInterval(interval);
-    quizContainer.classList.add('hidden');
-    resultScreen.classList.remove('hidden');
-
-    let aciertos = 0;
-    ronda.forEach((p, i) => {
-        if (respuestasUsuario[i] === p.respuesta) aciertos++;
-    });
-
-    scoreDisplay.textContent = `${aciertos} / ${ronda.length}`;
-
-    if (tiempo) alert("Tiempo terminado.");
-}
-
-// 5. REVISIÓN
-btnReview.onclick = () => {
-    resultScreen.classList.add('hidden');
-    reviewContainer.classList.remove('hidden');
-    reviewActions.classList.remove('hidden');
-
-    reviewContainer.innerHTML = '';
-
-    ronda.forEach((p, i) => {
-        const userAns = respuestasUsuario[i];
-        const ok = (userAns === p.respuesta);
-
-        const card = document.createElement('div');
-        card.className = "bg-white p-4 rounded border shadow-sm mb-4";
-
-        let html = `<p class="font-bold mb-2">${i + 1}. ${p.pregunta}</p>`;
-
-        if (p.imagen) html += `<img src="${p.imagen}" class="quiz-image" style="max-height:150px;">`;
-
-        p.opciones.forEach((op, k) => {
-            let cls = "";
-            if (k === p.respuesta) cls = "ans-correct";
-            else if (k === userAns && !ok) cls = "ans-wrong";
-            else if (k === userAns) cls = "option-selected";
-
-            html += `<div class="p-2 rounded border mb-1 ${cls}">${op}</div>`;
-        });
-
-        if (p.explicacion)
-            html += `<div class="text-xs text-gray-500 mt-2 italic bg-gray-100 p-2">Nota: ${p.explicacion}</div>`;
-
-        card.innerHTML = html;
-        reviewContainer.appendChild(card);
-    });
-};
-
-// Guardado
-const KEY = 'simulador_data';
-
-btnGuardar.onclick = () => {
-    localStorage.setItem(KEY, JSON.stringify({ ronda, respuestasUsuario, idx }));
-    alert("Guardado.");
-};
-
-btnCargar.onclick = () => {
-    const d = JSON.parse(localStorage.getItem(KEY));
-    if (d) {
-        ronda = d.ronda;
-        respuestasUsuario = d.respuestasUsuario;
-        idx = d.idx;
-        startScreen.classList.add('hidden');
-        quizContainer.classList.remove('hidden');
-        iniciarTimer();
-        mostrarPregunta();
-    } else alert("No hay datos.");
-};
