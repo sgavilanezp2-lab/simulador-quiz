@@ -5,7 +5,7 @@ const correosPermitidos = [
   "jzamoram9@unemi.edu.ec", "fcarrillop@unemi.edu.ec", "naguilarb@unemi.edu.ec",
   "ehidalgoc4@unemi.edu.ec", "lbrionesg3@unemi.edu.ec", "xsalvadorv@unemi.edu.ec",
   "nbravop4@unemi.edu.ec", "jmoreirap6@unemi.edu.ec", "kholguinb2@unemi.edu.ec",
-  "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com", "stalin5766@gmail.com"
+  "jcastrof8@unemi.edu.ec"
 ];
 
 // Referencias DOM
