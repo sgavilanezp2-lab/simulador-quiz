@@ -109,6 +109,7 @@ function mostrarPregunta() {
 
     const q = ronda[idx];
 
+    // Inserto los botones locales DEBAJO de las opciones (se generarán en cada pregunta)
     preguntaRender.innerHTML = `
         <h2 class="text-lg font-bold text-gray-800 mb-4">${q.pregunta}</h2>
 
@@ -118,6 +119,12 @@ function mostrarPregunta() {
         </div>` : ''}
 
         <div id="opcionesBox" class="flex flex-col gap-2"></div>
+
+        <!-- BOTONES DE GUARDADO LOCAL (se muestran solo en modo estudio) -->
+        <div id="studyLocalControls" class="hidden mt-4 flex gap-3">
+            <button id="btnGuardarLocal" class="text-xs text-gray-500 underline hover:text-blue-600">Guardar progreso local</button>
+            <button id="btnCargarLocal" class="text-xs text-gray-500 underline hover:text-blue-600">Cargar progreso local</button>
+        </div>
 
         <div class="mt-6 flex justify-end">
             <button id="btnSiguiente" class="btn-start" style="width:auto; padding:8px 25px; opacity:0.5;" disabled>
@@ -135,6 +142,54 @@ function mostrarPregunta() {
         btn.onclick = () => seleccionar(i, btn);
         opcionesBox.appendChild(btn);
     });
+
+    // Mostrar/ocultar controles locales según modo
+    const studyLocalControls = document.getElementById('studyLocalControls');
+    if (modoSel.value === "estudio") {
+        studyLocalControls.classList.remove('hidden');
+    } else {
+        studyLocalControls.classList.add('hidden');
+    }
+
+    // Conectar listeners de guardado/carga local (se re-conectan cada render)
+    const btnGuardarLocal = document.getElementById('btnGuardarLocal');
+    const btnCargarLocal = document.getElementById('btnCargarLocal');
+
+    if (btnGuardarLocal) {
+        btnGuardarLocal.onclick = () => {
+            if (modoSel.value !== "estudio") {
+                alert("Solo puedes guardar en modo estudio.");
+                return;
+            }
+            const state = { ronda, idx, respuestasUsuario };
+            localStorage.setItem("simulador_local", JSON.stringify(state));
+            alert("Progreso guardado localmente.");
+        };
+    }
+
+    if (btnCargarLocal) {
+        btnCargarLocal.onclick = () => {
+            const data = JSON.parse(localStorage.getItem("simulador_local"));
+            if (!data) {
+                alert("No hay progreso guardado localmente.");
+                return;
+            }
+
+            // Restaurar estado guardado
+            ronda = data.ronda || [];
+            idx = typeof data.idx === 'number' ? data.idx : 0;
+            respuestasUsuario = data.respuestasUsuario || [];
+
+            // Mostrar quiz en el estado cargado
+            startScreen.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            if (modoSel.value === "estudio") studyLocalControls.classList.remove('hidden');
+            iniciarTimer(); // reinicia timer según el select actual (no guarda tiempo restante)
+            mostrarPregunta();
+
+            alert("Progreso cargado.");
+        };
+    }
 
     document.getElementById('btnSiguiente').onclick = avanzar;
 }
@@ -156,7 +211,7 @@ function seleccionar(index, btnRef) {
             btnRef.classList.add("ans-correct");
         } else {
             btnRef.classList.add("ans-wrong");
-            all[q.respuesta].classList.add("ans-correct");
+            if (all[q.respuesta]) all[q.respuesta].classList.add("ans-correct");
         }
 
         if (q.explicacion) {
