@@ -1,20 +1,19 @@
-// LISTA BLANCA DE CORREOS AUTORIZADOS
+// LISTA BLANCA
 const correosPermitidos = [
   "dpachecog2@unemi.edu.ec", "cnavarretem4@unemi.edu.ec", "htigrer@unemi.edu.ec",
   "gorellanas2@unemi.edu.ec", "iastudillol@unemi.edu.ec", "sgavilanezp2@unemi.edu.ec",
   "jzamoram9@unemi.edu.ec", "fcarrillop@unemi.edu.ec", "naguilarb@unemi.edu.ec",
   "ehidalgoc4@unemi.edu.ec", "lbrionesg3@unemi.edu.ec", "xsalvadorv@unemi.edu.ec",
   "nbravop4@unemi.edu.ec", "jmoreirap6@unemi.edu.ec", "kholguinb2@unemi.edu.ec",
-  "jcastrof8@unemi.edu.ec"
+  "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com", "stalin5766@gmail.com"
 ];
 
-// Referencias DOM
+// Referencias
 const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
 const authMsg = document.getElementById("authMsg");
 const btnGoogle = document.getElementById("btnGoogle");
-// REFERENCIA AL BOTÓN DENTRO DEL HEADER
-const btnLogout = document.getElementById("btnLogoutHeader"); 
+const btnLogout = document.getElementById("btnLogoutHeader"); // Referencia al botón integrado
 
 // ID Dispositivo
 function getDeviceId() {
@@ -26,7 +25,7 @@ function getDeviceId() {
   return id;
 }
 
-// Validar Dispositivos en Firestore
+// Validar Seguridad
 async function validarSeguridad(user) {
   try {
     const userRef = db.collection("usuarios_seguros").doc(user.email); 
@@ -62,7 +61,7 @@ async function validarSeguridad(user) {
   }
 }
 
-// Botón Google (Único método de Login)
+// Botón Google
 btnGoogle.onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -79,7 +78,7 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// Botón Logout (Conectado al botón del Header)
+// Botón Logout
 if (btnLogout) {
   btnLogout.onclick = () => {
     auth.signOut().then(() => window.location.reload());
@@ -98,13 +97,13 @@ auth.onAuthStateChanged(async (user) => {
       appPanel.classList.remove("hidden");
       if(btnLogout) btnLogout.classList.remove("hidden"); 
       
-      // ******* CORRECCIÓN DE REGRESIÓN: UI *******
+      // ******* SOLUCIÓN DE REGRESIÓN: FORZAR DATOS *******
       const userEmailDisplay = document.getElementById("userEmailDisplay");
       const verificationMsg = document.getElementById("verificationMsg");
       
-      if(userEmailDisplay) userEmailDisplay.textContent = user.email; // Pone el correo
-      if(verificationMsg) verificationMsg.classList.remove("hidden"); // Muestra el mensaje verde
-      // *******************************************
+      if(userEmailDisplay) userEmailDisplay.textContent = user.email;
+      if(verificationMsg) verificationMsg.classList.remove("hidden"); 
+      // ***************************************************
 
     } else {
       // FALLO
