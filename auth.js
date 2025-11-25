@@ -8,17 +8,9 @@ const correosPermitidos = [
   "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com"
 ];
 
-function toast(msg) {
-  let t = document.createElement("div");
-  t.className = "toast";
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
+// --- ELEMENTOS DOM ---
 const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
-
 const email = document.getElementById("email");
 const password = document.getElementById("password");
 const authMsg = document.getElementById("authMsg");
@@ -27,6 +19,15 @@ const btnLogin = document.getElementById("btnLogin");
 const btnRegistro = document.getElementById("btnRegistro");
 const btnGoogle = document.getElementById("btnGoogle");
 const btnLogout = document.getElementById("btnLogout");
+
+// --- MENSAJE FLOTANTE ---
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
 
 // --- GENERAR ID DE DISPOSITIVO ---
 function getDeviceId() {
@@ -38,14 +39,20 @@ function getDeviceId() {
   return id;
 }
 
+// --- REGISTRAR INTENTOS FALLIDOS ---
 async function registrarIntentoFallido(correo) {
-  await db.collection("loginAttempts").add({
-    email: correo,
-    fecha: new Date(),
-    dispositivo: getDeviceId()
-  });
+  try {
+    await db.collection("loginAttempts").add({
+      email: correo,
+      fecha: new Date(),
+      dispositivo: getDeviceId()
+    });
+  } catch(e) {
+    console.error("Error registrando intento fallido:", e);
+  }
 }
 
+// --- VALIDAR DISPOSITIVOS (LÍMITE 2) ---
 async function validarDispositivos(user) {
   const ref = db.collection("users").doc(user.uid);
   const snap = await ref.get();
@@ -60,7 +67,7 @@ async function validarDispositivos(user) {
     return true;
   }
 
-  let data = snap.data();
+  const data = snap.data();
   let devices = data.devices || [];
 
   if (!devices.includes(devId)) {
@@ -76,17 +83,15 @@ async function validarDispositivos(user) {
   return true;
 }
 
-// --- LOGIN ---
+// --- LOGIN CON CORREO ---
 btnLogin.onclick = async () => {
   try {
-    let correo = email.value.trim().toLowerCase();
-
+    const correo = email.value.trim().toLowerCase();
     if (!correosPermitidos.includes(correo)) {
       toast("ACCESO DENEGADO");
       registrarIntentoFallido(correo);
       return;
     }
-
     await auth.signInWithEmailAndPassword(correo, password.value);
   } catch (e) {
     authMsg.textContent = e.message;
@@ -96,27 +101,24 @@ btnLogin.onclick = async () => {
 // --- REGISTRO ---
 btnRegistro.onclick = async () => {
   try {
-    let correo = email.value.trim().toLowerCase();
-
+    const correo = email.value.trim().toLowerCase();
     if (!correosPermitidos.includes(correo)) {
       toast("ACCESO DENEGADO");
       registrarIntentoFallido(correo);
       return;
     }
-
     await auth.createUserWithEmailAndPassword(correo, password.value);
   } catch (e) {
     authMsg.textContent = e.message;
   }
 };
 
-// --- GOOGLE LOGIN ---
+// --- LOGIN CON GOOGLE ---
 btnGoogle.onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-
-    let correo = result.user.email.toLowerCase();
+    const correo = result.user.email.toLowerCase();
 
     if (!correosPermitidos.includes(correo)) {
       toast("ACCESO DENEGADO");
@@ -129,21 +131,19 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// LOGOUT
+// --- LOGOUT ---
 btnLogout.onclick = () => auth.signOut();
 
-// SESIÓN
+// --- CAMBIO DE ESTADO ---
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     const permitido = await validarDispositivos(user);
-
     if (!permitido) {
       toast("Límite de dispositivos (2) excedido");
       registrarIntentoFallido(user.email);
       auth.signOut();
       return;
     }
-
     authPanel.classList.add("hidden");
     appPanel.classList.remove("hidden");
   } else {
