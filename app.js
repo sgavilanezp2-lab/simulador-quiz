@@ -1,5 +1,5 @@
 // Configuración: APUNTA A LA CARPETA PREGUNTAS
-const MATERIA_URL = './preguntas/escalabilidad.json'; 
+const MATERIA_URL = 'escalabilidad.json'; 
 const CANTIDAD_EXAMEN = 30;
 
 // Referencias DOM
@@ -198,4 +198,5 @@ btnCargar.onclick = () => {
   if(d) { ronda=d.ronda; respuestasUsuario=d.respuestasUsuario; idx=d.idx; startScreen.classList.add('hidden'); quizContainer.classList.remove('hidden'); iniciarTimer(); mostrarPregunta(); }
   else alert("No hay datos.");
 };
+
 
