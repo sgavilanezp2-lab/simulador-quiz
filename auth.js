@@ -68,11 +68,16 @@ btnGoogle.onclick = async () => {
     const result = await auth.signInWithPopup(provider);
     let correo = result.user.email.toLowerCase();
 
-    if (!correosPermitidos.includes(correo)) {
+    // ⛔ NUEVA VALIDACIÓN PEDIDA
+    const dominioCorrecto = correo.endsWith("@unemi.edu.ec");
+    const estaEnLista = correosPermitidos.includes(correo);
+
+    if (!(dominioCorrecto && estaEnLista)) {
       await auth.signOut();
       authMsg.textContent = "Correo no autorizado.";
       return;
     }
+
   } catch (e) {
     authMsg.textContent = e.message;
   }
@@ -88,6 +93,19 @@ if (btnLogout) {
 // MONITOR DE SESIÓN
 auth.onAuthStateChanged(async (user) => {
   if (user) {
+
+    // ⛔ BLOQUEO EXTRA (por si omiten el popup)
+    const correo = user.email.toLowerCase();
+    const dominioCorrecto = correo.endsWith("@unemi.edu.ec");
+    const estaEnLista = correosPermitidos.includes(correo);
+
+    if (!(dominioCorrecto && estaEnLista)) {
+      alert("Tu cuenta no está autorizada para acceder al simulador.");
+      await auth.signOut();
+      return;
+    }
+    // -------------------------------------------
+
     authPanel.classList.add("hidden");
     
     const validacion = await validarSeguridad(user);
