@@ -33,28 +33,46 @@ let seleccionTemporal = null;
 let interval = null;
 
 // ==========================================
-// UTILIDADES UI (CONTADOR FLOTANTE)
+// UTILIDADES UI (CONTADOR AL LADO DEL RELOJ)
 // ==========================================
 let divContador = document.getElementById("contadorPreguntas");
+
 if (!divContador) {
-    divContador = document.createElement("div");
+    // Usamos 'span' para que se comporte bien en línea
+    divContador = document.createElement("span");
     divContador.id = "contadorPreguntas";
-    divContador.style.position = "fixed";
-    divContador.style.top = "10px";
-    divContador.style.right = "10px";
-    divContador.style.background = "#ffffffcc";
-    divContador.style.padding = "8px 12px";
-    divContador.style.borderRadius = "6px";
+    
+    // Estilos para integrarlo junto al reloj
+    divContador.style.marginRight = "15px";       // Separación con el reloj
+    divContador.style.paddingRight = "15px";      // Aire interno
+    divContador.style.borderRight = "2px solid #e5e7eb"; // Línea separadora gris
+    divContador.style.color = "#4b5563";          // Color gris profesional
     divContador.style.fontWeight = "bold";
-    divContador.style.fontSize = "14px";
-    divContador.style.zIndex = "9999";
-    divContador.style.display = "none";
-    divContador.textContent = "Pregunta 1 / 1";
-    document.body.appendChild(divContador);
+    divContador.style.fontSize = "1.1rem";        // Tamaño similar al del reloj
+    divContador.style.display = "none";           // Oculto al inicio
+    divContador.textContent = "Pregunta 1 / --";
+
+    // Inserción en el DOM: Buscamos al padre del reloj
+    if (timerEl && timerEl.parentNode) {
+        // Ajustamos el contenedor padre para que alinee los elementos en fila
+        timerEl.parentNode.style.display = "flex";
+        timerEl.parentNode.style.alignItems = "center";
+        timerEl.parentNode.style.justifyContent = "center"; // Centrado (opcional)
+        
+        // Insertamos el contador ANTES del reloj
+        timerEl.parentNode.insertBefore(divContador, timerEl);
+    } else {
+        // Fallback: Si no encuentra el reloj, lo pone flotante arriba a la derecha
+        divContador.style.position = "fixed";
+        divContador.style.top = "10px";
+        divContador.style.right = "10px";
+        document.body.appendChild(divContador);
+    }
 }
 
 function actualizarContadorPreguntas() {
     if (!ronda.length) return;
+    // Mostramos el contador
     divContador.style.display = "block";
     divContador.textContent = `Pregunta ${idx + 1} / ${ronda.length}`;
 }
