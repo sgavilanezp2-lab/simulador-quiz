@@ -130,3 +130,55 @@ body {
 .ans-wrong { background: #fee2e2 !important; border: 2px solid #ef4444 !important; color: #7f1d1d; text-decoration: line-through; }
 .btn-action { padding: 8px 20px; border-radius: 8px; border: none; color: white; font-weight: bold; cursor: pointer; }
 .yellow { background: #eab308; } .gray { background: #4b5563; } .blue { background: #1a73e8; }
+/* Estilo base de cada opción */
+.opt {
+    display: block;              /* Ocupa todo el ancho */
+    width: 100%;
+    padding: 15px 20px;          /* Espacio interno para que el texto respire */
+    margin-bottom: 12px;         /* Separación entre opciones */
+    background-color: #ffffff;   /* Fondo blanco */
+    border: 2px solid #e2e8f0;   /* Borde gris muy suave */
+    border-radius: 12px;         /* Esquinas redondeadas */
+    
+    font-size: 1rem;
+    color: #334155;              /* Color de texto gris oscuro (más legible) */
+    text-align: left;            /* Alinear a la izquierda se lee mejor */
+    line-height: 1.5;            /* Altura de línea para textos largos */
+    
+    cursor: pointer;
+    transition: all 0.2s ease;   /* Animación suave */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra sutil */
+}
+
+/* Efecto al pasar el mouse por encima (Hover) */
+.opt:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateY(-2px); /* Se levanta un poquito */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* --- ESTADOS LOGICOS (Agregados por JS) --- */
+
+/* Cuando el usuario selecciona una opción (antes de confirmar si es correcta o no) */
+.opt.option-selected {
+    background-color: #eff6ff;   /* Azul muy claro */
+    border-color: #3b82f6;       /* Borde azul */
+    color: #1e40af;              /* Texto azul oscuro */
+    font-weight: 600;
+}
+
+/* Respuesta CORRECTA (Verde) - Para modo estudio/revisión */
+.opt.ans-correct {
+    background-color: #dcfce7 !important;
+    border-color: #22c55e !important;
+    color: #14532d !important;
+}
+
+/* Respuesta INCORRECTA (Rojo) - Para modo estudio/revisión */
+.opt.ans-wrong {
+    background-color: #fee2e2 !important;
+    border-color: #ef4444 !important;
+    color: #7f1d1d !important;
+    opacity: 0.8;
+}
