@@ -1,28 +1,26 @@
-// --- LISTA BLANCA ---
+// LISTA BLANCA
 const correosPermitidos = [
   "dpachecog2@unemi.edu.ec", "cnavarretem4@unemi.edu.ec", "htigrer@unemi.edu.ec",
   "gorellanas2@unemi.edu.ec", "iastudillol@unemi.edu.ec", "sgavilanezp2@unemi.edu.ec",
   "jzamoram9@unemi.edu.ec", "fcarrillop@unemi.edu.ec", "naguilarb@unemi.edu.ec",
   "ehidalgoc4@unemi.edu.ec", "lbrionesg3@unemi.edu.ec", "xsalvadorv@unemi.edu.ec",
   "nbravop4@unemi.edu.ec", "jmoreirap6@unemi.edu.ec", "kholguinb2@unemi.edu.ec",
-  "jcastrof8@unemi.edu.ec"
+  "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com"
 ];
 
+// Referencias
 const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
 const authMsg = document.getElementById("authMsg");
 const btnGoogle = document.getElementById("btnGoogle");
 const btnLogout = document.getElementById("btnLogout");
+const logoutArea = document.getElementById("logoutArea");
 
-function toast(msg) {
-  let t = document.createElement("div");
-  t.className = "toast";
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 4000);
-}
+// UI Usuario
+const userEmailDisplay = document.getElementById("userEmailDisplay");
+const verificationMsg = document.getElementById("verificationMsg");
 
-// --- ID DE DISPOSITIVO ---
+// ID Dispositivo
 function getDeviceId() {
   let id = localStorage.getItem("deviceId_secure");
   if (!id) {
@@ -32,7 +30,7 @@ function getDeviceId() {
   return id;
 }
 
-// --- VALIDAR SEGURIDAD ---
+// Validar
 async function validarSeguridad(user) {
   try {
     const userRef = db.collection("usuarios_seguros").doc(user.email); 
@@ -41,10 +39,8 @@ async function validarSeguridad(user) {
 
     if (!snap.exists) {
       await userRef.set({
-        uid: user.uid,
-        email: user.email,
-        dispositivos: [miDispositivo],
-        ultimoAcceso: new Date()
+        uid: user.uid, email: user.email,
+        dispositivos: [miDispositivo], ultimoAcceso: new Date()
       });
       return { permitido: true };
     }
@@ -61,10 +57,7 @@ async function validarSeguridad(user) {
         await userRef.update({ dispositivos: dispositivos, ultimoAcceso: new Date() });
         return { permitido: true };
       } else {
-        return { 
-          permitido: false, 
-          msg: "⛔ Límite de dispositivos excedido (PC + Celular). No puedes usar un tercer equipo." 
-        };
+        return { permitido: false, msg: "⛔ Límite de dispositivos excedido." };
       }
     }
   } catch (error) {
@@ -73,7 +66,7 @@ async function validarSeguridad(user) {
   }
 }
 
-// --- LOGIN GOOGLE ---
+// Botón Google
 btnGoogle.onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -82,8 +75,7 @@ btnGoogle.onclick = async () => {
 
     if (!correosPermitidos.includes(correo)) {
       await auth.signOut();
-      toast("⛔ Correo no autorizado.");
-      authMsg.textContent = "Tu correo no tiene permiso de acceso.";
+      authMsg.textContent = "Correo no autorizado.";
       return;
     }
   } catch (e) {
@@ -91,34 +83,41 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// --- LOGOUT ---
+// Botón Logout
 if (btnLogout) {
   btnLogout.onclick = () => {
-    auth.signOut();
-    window.location.reload();
+    auth.signOut().then(() => window.location.reload());
   };
 }
 
-// --- MONITOR ---
+// MONITOR DE SESIÓN
 auth.onAuthStateChanged(async (user) => {
   if (user) {
+    // Ocultar Login
     authPanel.classList.add("hidden");
+    
+    // Validar
     const validacion = await validarSeguridad(user);
 
     if (validacion.permitido) {
+      // Mostrar App
       appPanel.classList.remove("hidden");
-      authMsg.textContent = "";
+      logoutArea.classList.remove("hidden");
+      
+      // --- AQUÍ ESTÁ LA MAGIA PARA QUE SALGA EL TEXTO VERDE ---
+      if(userEmailDisplay) userEmailDisplay.textContent = user.email;
+      if(verificationMsg) verificationMsg.classList.remove("hidden"); // Quitamos el 'hidden'
+      // --------------------------------------------------------
+
     } else {
-      toast(validacion.msg);
-      authMsg.textContent = validacion.msg; 
+      alert(validacion.msg);
       await auth.signOut();
-      setTimeout(() => {
-        authPanel.classList.remove("hidden");
-        appPanel.classList.add("hidden");
-      }, 2500);
+      window.location.reload();
     }
   } else {
+    // Mostrar Login
     authPanel.classList.remove("hidden");
     appPanel.classList.add("hidden");
+    logoutArea.classList.add("hidden");
   }
 });
