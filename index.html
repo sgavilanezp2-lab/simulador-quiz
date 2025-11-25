@@ -33,6 +33,28 @@
     .dark .pill { @apply bg-slate-800 text-slate-200 border-slate-700; }
     .dark .opt { @apply bg-slate-900 border-slate-700 hover:bg-slate-800; }
   </style>
+  <style>
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #dc2626;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px #0003;
+  font-weight: bold;
+  opacity: 0;
+  animation: show 3s ease forwards;
+}
+@keyframes show {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+</style>
+
 </head>
 
 <body class="min-h-full bg-gradient-to-b from-slate-50 to-slate-100">
@@ -200,6 +222,10 @@
 
 <!-- APP JS -->
 <script src="app.js?v=11"></script>
+<script src="firebase-init.js"></script>
+<script src="auth.js"></script>
+<script src="app.js"></script>
+
 
 </body>
 </html>
