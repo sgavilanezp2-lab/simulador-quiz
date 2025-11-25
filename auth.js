@@ -1,4 +1,4 @@
-// --- LISTA BLANCA DE CORREOS ---
+// --- LISTA BLANCA ---
 const correosPermitidos = [
   "dpachecog2@unemi.edu.ec", "cnavarretem4@unemi.edu.ec", "htigrer@unemi.edu.ec",
   "gorellanas2@unemi.edu.ec", "iastudillol@unemi.edu.ec", "sgavilanezp2@unemi.edu.ec",
@@ -8,18 +8,12 @@ const correosPermitidos = [
   "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com"
 ];
 
-// --- REFERENCIAS DOM ---
 const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
-const email = document.getElementById("email");
-const password = document.getElementById("password");
 const authMsg = document.getElementById("authMsg");
-const btnLogin = document.getElementById("btnLogin");
-const btnRegistro = document.getElementById("btnRegistro");
 const btnGoogle = document.getElementById("btnGoogle");
 const btnLogout = document.getElementById("btnLogout");
 
-// --- UTILIDAD: TOAST ---
 function toast(msg) {
   let t = document.createElement("div");
   t.className = "toast";
@@ -28,7 +22,7 @@ function toast(msg) {
   setTimeout(() => t.remove(), 4000);
 }
 
-// --- 1. GENERAR ID DE DISPOSITIVO ÚNICO ---
+// --- ID DE DISPOSITIVO ---
 function getDeviceId() {
   let id = localStorage.getItem("deviceId_secure");
   if (!id) {
@@ -38,14 +32,13 @@ function getDeviceId() {
   return id;
 }
 
-// --- 2. VALIDAR SOLO DISPOSITIVOS (Sin IP) ---
+// --- VALIDAR SEGURIDAD ---
 async function validarSeguridad(user) {
   try {
     const userRef = db.collection("usuarios_seguros").doc(user.email); 
     const snap = await userRef.get();
     const miDispositivo = getDeviceId();
 
-    // A) USUARIO NUEVO
     if (!snap.exists) {
       await userRef.set({
         uid: user.uid,
@@ -56,16 +49,13 @@ async function validarSeguridad(user) {
       return { permitido: true };
     }
 
-    // B) USUARIO EXISTENTE
     const data = snap.data();
     let dispositivos = data.dispositivos || [];
 
-    // Verificación: ¿Es este navegador uno de los registrados?
     if (dispositivos.includes(miDispositivo)) {
       await userRef.update({ ultimoAcceso: new Date() });
       return { permitido: true };
     } else {
-      // DISPOSITIVO NUEVO - ¿Tiene cupo? (Máximo 2)
       if (dispositivos.length < 2) {
         dispositivos.push(miDispositivo);
         await userRef.update({ dispositivos: dispositivos, ultimoAcceso: new Date() });
@@ -79,38 +69,11 @@ async function validarSeguridad(user) {
     }
   } catch (error) {
     console.error("Error seguridad:", error);
-    return { permitido: true }; // En caso de error de red, permitimos entrar
+    return { permitido: true };
   }
 }
 
-// --- LOGICA DE LOGIN ---
-btnLogin.onclick = async () => {
-  try {
-    let correo = email.value.trim().toLowerCase();
-    if (!correosPermitidos.includes(correo)) {
-      toast("⛔ Correo no autorizado.");
-      return;
-    }
-    await auth.signInWithEmailAndPassword(correo, password.value);
-  } catch (e) {
-    authMsg.textContent = "Error: " + e.message;
-  }
-};
-
-btnRegistro.onclick = async () => {
-  try {
-    let correo = email.value.trim().toLowerCase();
-    if (!correosPermitidos.includes(correo)) {
-      toast("⛔ Correo no autorizado.");
-      return;
-    }
-    await auth.createUserWithEmailAndPassword(correo, password.value);
-    toast("✅ Registro exitoso. Ingresando...");
-  } catch (e) {
-    authMsg.textContent = "Error Registro: " + e.message;
-  }
-};
-
+// --- LOGIN GOOGLE ---
 btnGoogle.onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -119,7 +82,8 @@ btnGoogle.onclick = async () => {
 
     if (!correosPermitidos.includes(correo)) {
       await auth.signOut();
-      toast("⛔ Correo Google no autorizado.");
+      toast("⛔ Correo no autorizado.");
+      authMsg.textContent = "Tu correo no tiene permiso de acceso.";
       return;
     }
   } catch (e) {
@@ -127,7 +91,7 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// Botón Salir
+// --- LOGOUT ---
 if (btnLogout) {
   btnLogout.onclick = () => {
     auth.signOut();
@@ -135,7 +99,7 @@ if (btnLogout) {
   };
 }
 
-// --- MONITOR DE SESIÓN ---
+// --- MONITOR ---
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     authPanel.classList.add("hidden");
