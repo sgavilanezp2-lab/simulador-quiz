@@ -17,11 +17,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
   <style>
-    /* Ajustes rápidos para asegurar compatibilidad */
-    body { margin: 0; padding: 0; }
-    .hidden { display: none !important; }
-    
-    /* Estilo de la tarjeta blanca */
+    /* Ajustes para asegurar que se vea bien */
     .app-card {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
@@ -29,14 +25,15 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         border: 1px solid rgba(255,255,255,0.5);
         width: 100%;
-        max-width: 900px;
-        margin: 40px auto; /* Centrado con margen arriba */
+        max-width: 800px;
+        margin: 40px auto;
         padding: 2rem;
         position: relative;
         z-index: 10;
     }
-
-    /* Estilo para las opciones de respuesta */
+    .hidden { display: none !important; }
+    
+    /* Estilos para las preguntas */
     .opt { width: 100%; text-align: left; padding: 12px; border-radius: 8px; border: 1px solid #ddd; background: white; margin-bottom: 8px; transition: 0.2s; }
     .opt:hover:not(:disabled) { background: #f0f9ff; border-color: #1a73e8; }
     .option-selected { background-color: #e0e7ff !important; border: 2px solid #4f46e5 !important; font-weight: bold; }
@@ -56,8 +53,7 @@
 
     <section id="authPanel" class="app-card text-center max-w-md mt-20">
       <h2 class="text-2xl font-bold text-gray-800 mb-2">Iniciar sesión</h2>
-      <p class="text-gray-500 mb-6 text-sm">Accede para utilizar el simulador</p>
-
+      <p class="text-gray-500 mb-6 text-sm">Accede con tu cuenta institucional</p>
       <p id="authMsg" class="text-red-600 text-sm mb-4 font-bold"></p>
 
       <button id="btnGoogle"
@@ -73,14 +69,12 @@
         
         <div class="flex flex-wrap items-center gap-3 flex-1">
             <span class="font-bold text-blue-700 flex items-center gap-2">
-                <i class="fa-solid fa-book"></i> Escalabilidad
+                📘 Escalabilidad
             </span>
-            
             <select id="modo" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="examen">📝 Examen (30 Preg.)</option>
                 <option value="estudio">📚 Estudio (Todas)</option>
             </select>
-            
             <select id="minutos" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="60">60 min</option>
                 <option value="30">30 min</option>
@@ -93,8 +87,7 @@
             <div class="font-mono text-xl font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-100">
                 ⏱ <span id="timer">--:--</span>
             </div>
-            
-            <button id="btnLogout" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center gap-2">
+            <button id="btnLogout" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded-lg shadow transition-colors">
                 Cerrar Sesión
             </button>
         </div>
@@ -102,7 +95,7 @@
 
       <div id="startScreen" class="text-center py-8">
          <div class="mb-6">
-             <p class="text-gray-600 text-lg">Configura tu prueba arriba y presiona <b>Empezar</b>.</p>
+             <p class="text-gray-600">Configura la prueba y presiona Empezar.</p>
          </div>
          
          <button id="btnEmpezar" class="px-8 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1">
@@ -110,37 +103,29 @@
          </button>
 
          <div class="mt-6 flex justify-center gap-3">
-           <button id="btnGuardar" class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-sm text-gray-700 transition">💾 Guardar Progreso</button>
-           <button id="btnCargar" class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-sm text-gray-700 transition">📂 Cargar Progreso</button>
+           <button id="btnGuardar" class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-sm text-gray-700">💾 Guardar</button>
+           <button id="btnCargar" class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 hover:bg-gray-100 text-sm text-gray-700">📂 Cargar</button>
          </div>
          <p id="estado" class="mt-4 text-sm text-blue-600 font-semibold h-5"></p>
       </div>
 
-      <div id="quizContainer" class="hidden mt-2">
-         </div>
+      <div id="quizContainer" class="hidden mt-2"></div>
 
       <div id="resultScreen" class="hidden text-center py-10">
-         <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Examen Finalizado!</h2>
-         <p class="text-gray-500">Tu puntaje final es:</p>
+         <h2 class="text-3xl font-bold text-gray-800 mb-2">¡Finalizado!</h2>
          <div id="scoreDisplay" class="text-6xl font-black text-blue-600 my-6">0 / 0</div>
-         
          <div class="flex justify-center gap-4">
-           <button id="btnReview" class="px-6 py-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 font-bold shadow transition">
-             🔍 Revisar
-           </button>
-           <button onclick="location.reload()" class="px-6 py-2 rounded-xl bg-gray-700 text-white hover:bg-gray-800 font-bold shadow transition">
-             🏠 Inicio
-           </button>
+           <button id="btnReview" class="px-6 py-2 rounded-xl bg-yellow-500 text-white hover:bg-yellow-600 font-bold shadow">🔍 Revisar</button>
+           <button onclick="location.reload()" class="px-6 py-2 rounded-xl bg-gray-700 text-white hover:bg-gray-800 font-bold shadow">🏠 Inicio</button>
          </div>
       </div>
 
-      <div id="reviewContainer" class="hidden mt-4 space-y-6 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar"></div>
+      <div id="reviewContainer" class="hidden mt-4 space-y-6 max-h-[60vh] overflow-y-auto pr-2"></div>
       <div id="reviewActions" class="hidden text-center mt-6 pt-4 border-t border-gray-100">
-          <button onclick="location.reload()" class="px-6 py-2 rounded-xl bg-blue-600 text-white font-bold shadow hover:bg-blue-700 transition">Finalizar Revisión</button>
+          <button onclick="location.reload()" class="px-6 py-2 rounded-xl bg-blue-600 text-white font-bold shadow">Finalizar</button>
       </div>
 
     </section>
-
 </div>
 
 <script src="firebase-init.js"></script>
