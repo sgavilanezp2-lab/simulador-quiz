@@ -223,3 +223,7 @@ btnCargar && (btnCargar.onclick = ()=>{
     mostrarPregunta(); iniciarTimer();
   }catch(e){ alert('No pude cargar el progreso. Archivo corrupto.'); }
 });
+document.getElementById("contenedorApp").innerHTML = `
+  <h2 class="text-lg font-bold">Simulador activo ✔</h2>
+  <p>Puedes agregar aquí la lógica del examen.</p>
+`;
