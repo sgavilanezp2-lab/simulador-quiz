@@ -1,22 +1,18 @@
 // ===============================
-// APP v12 - Simulador de preguntas (con Guardado Local)
+// APP - Simulador Escalabilidad
 // ===============================
 
-// --- Config y estado ---
-
-// Materia Fija y configuración
-const MATERIA_URL = 'preguntas/escalabilidad.json';
+// Configuración
+const MATERIA_URL = 'escalabilidad.json'; // Asegúrate que el JSON esté junto al index.html
 const CANTIDAD_EXAMEN = 30;
 const MATERIA_NOMBRE = 'escalabilidad';
 
 const estado = document.getElementById('estado');
 const contenedor = document.getElementById('contenedor');
 const timerEl = document.getElementById('timer');
-
 const btnEmpezar = document.getElementById('btnEmpezar');
 const btnGuardar = document.getElementById('btnGuardar'); 
 const btnCargar = document.getElementById('btnCargar'); 
-
 const modoSel = document.getElementById('modo');
 const minutosSel = document.getElementById('minutos');
 
@@ -27,21 +23,19 @@ let correctas = 0;
 let respuestas = [];
 let interval = null;
 
-// --- Utils ---
+// Utils
 function shuffle(a){ const b=a.slice(); for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]];} return b; }
 function sample(a,n){ return shuffle(a).slice(0, Math.min(n, a.length)); }
 function fmt(seg){ const m=Math.floor(seg/60).toString().padStart(2,'0'); const s=(seg%60).toString().padStart(2,'0'); return `${m}:${s}`; }
 
 async function cargarMateria(){
   const res = await fetch(MATERIA_URL); 
-  if(!res.ok) throw new Error('No pude cargar el banco de preguntas de Escalabilidad');
+  if(!res.ok) throw new Error('No pude cargar el banco de preguntas (escalabilidad.json)');
   const data = await res.json();
-  if(!Array.isArray(data)) throw new Error('El JSON de preguntas debe ser un arreglo');
   return data;
 }
 
-// --- Lógica y Render ---
-
+// Lógica de Timer
 function iniciarTimer(){
   clearInterval(interval);
   let seg = parseInt(minutosSel.value,10)*60;
@@ -53,23 +47,26 @@ function iniciarTimer(){
   },1000);
 }
 
+// Renderizado de Pregunta
 function mostrarPregunta(){
   if (idx >= ronda.length) { finalizar(false); return; }
   const q = ronda[idx];
 
+  // --- HTML DE LA PREGUNTA (CON IMAGEN SI EXISTE) ---
   contenedor.innerHTML = `
     <div class="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100 p-5">
       <div class="flex items-center gap-2 mb-2">
         <span class="text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border">Pregunta ${idx+1} / ${ronda.length}</span>
       </div>
 
-      <h2 class="text-lg font-semibold mb-3">${q.pregunta}</h2>
+      <h2 class="text-lg font-semibold mb-3 text-gray-800">${q.pregunta}</h2>
+      
       ${q.imagen ? `
-  <div class="flex justify-center my-4">
-    <img src="${q.imagen}" alt="Imagen de la pregunta"
-          class="max-w-full md:max-w-2xl rounded-xl border shadow-md">
-  </div>
-` : ''}
+      <div class="flex justify-center my-4">
+        <img src="${q.imagen}" alt="Imagen de topología"
+              class="max-w-full md:max-w-xl rounded-xl border shadow-md">
+      </div>
+      ` : ''}
 
       <div id="opciones" class="space-y-2"></div>
 
@@ -93,7 +90,7 @@ function mostrarPregunta(){
   const wrap = document.getElementById('opciones');
   wrap.innerHTML = q.opciones.map((op,i)=>`
     <button
-      class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition"
+      class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition text-gray-700"
       data-i="${i}">
       ${op}
     </button>
@@ -102,6 +99,7 @@ function mostrarPregunta(){
   wrap.querySelectorAll('.opt').forEach(btn=>{
     btn.addEventListener('click', () => responder(parseInt(btn.dataset.i,10)));
   });
+
   document.getElementById('btnPrev').onclick = () => { if (idx>0) { idx--; mostrarPregunta(); } };
   document.getElementById('btnNext').onclick = () => { if (idx<ronda.length-1) { idx++; mostrarPregunta(); } else { finalizar(false); } };
   document.getElementById('btnFin').onclick  = () => finalizar(false);
@@ -116,7 +114,6 @@ function mostrarPregunta(){
 
 function responder(iElegido){
   const q = ronda[idx];
-
   if (modoSel.value === 'estudio' && respuestas[idx] !== undefined) {
     if (respuestas[idx] === q.respuesta) correctas--;
   }
@@ -150,9 +147,8 @@ function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
   document.querySelectorAll('#opciones .opt').forEach((b,i)=>{
     b.disabled = true;
     b.classList.add('disabled:opacity-80');
-
     if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) {
-      b.classList.add('ring-2','ring-green-300');
+      b.classList.add('ring-2','ring-green-300', 'bg-green-50');
     }
     if (i===indiceElegida) {
       b.classList.add('ring-2','ring-indigo-300');
@@ -163,13 +159,11 @@ function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
 async function finalizar(porTiempo){
   clearInterval(interval);
   let total;
-
   if (modoSel.value === 'examen'){
     total = respuestas.reduce((acc, r, i)=> acc + (r===ronda[i].respuesta ? 1 : 0), 0);
   } else {
     total = correctas;
   }
-
   estado.textContent = (porTiempo ? '⏰ Se acabó el tiempo. ' : '🏁 Finalizado. ') + `Puntaje: ${total}/${ronda.length}`;
   contenedor.innerHTML = '';
 }
@@ -180,50 +174,37 @@ btnEmpezar.onclick = async () => {
     estado.textContent = 'Cargando preguntas de Escalabilidad...';
     contenedor.innerHTML = '';
     correctas = 0; respuestas = []; idx = 0;
-
     banco = await cargarMateria(); 
-
     if (modoSel.value === 'examen') {
         ronda = sample(banco, CANTIDAD_EXAMEN);
     } else {
         ronda = shuffle(banco); 
     }
-
-    estado.textContent = `Materia: Escalabilidad de redes — Preguntas seleccionadas: ${ronda.length}`;
+    estado.textContent = `Modo: ${modoSel.value.toUpperCase()} — Preguntas: ${ronda.length}`;
     mostrarPregunta();
     iniciarTimer();
   }catch(e){
-    estado.textContent = 'Error al iniciar el simulador: ' + e.message;
+    estado.textContent = 'Error: ' + e.message;
   }finally{
     btnEmpezar.disabled = false;
   }
 };
 
+// Guardar y Cargar localmente
 const STORAGE_KEY = 'simulador_quiz_estado_v1';
-
 btnGuardar && (btnGuardar.onclick = ()=>{
   const data = { materia: MATERIA_NOMBRE, modo: modoSel.value, minutos: minutosSel.value, ronda, idx, correctas, respuestas };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  alert('✅ Progreso guardado en este dispositivo.');
+  alert('✅ Progreso guardado.');
 });
-
 btnCargar && (btnCargar.onclick = ()=>{
   const raw = localStorage.getItem(STORAGE_KEY);
   if(!raw) return alert('No hay progreso guardado.');
   try{
     const d = JSON.parse(raw);
-
-    if (d.materia !== MATERIA_NOMBRE) {
-        return alert(`El progreso guardado es de la materia "${d.materia}". Solo se admite "Escalabilidad de redes".`);
-    }
-
     modoSel.value = d.modo; minutosSel.value = d.minutos;
     ronda = d.ronda; idx = d.idx; correctas = d.correctas; respuestas = d.respuestas || [];
-    estado.textContent = `Progreso cargado. Materia: Escalabilidad de redes — Preguntas: ${ronda.length}`;
+    estado.textContent = `Progreso cargado.`;
     mostrarPregunta(); iniciarTimer();
-  }catch(e){ alert('No pude cargar el progreso. Archivo corrupto.'); }
+  }catch(e){ alert('Error cargando progreso.'); }
 });
-document.getElementById("contenedorApp").innerHTML = `
-  <h2 class="text-lg font-bold">Simulador activo ✔</h2>
-  <p>Puedes agregar aquí la lógica del examen.</p>
-`;
