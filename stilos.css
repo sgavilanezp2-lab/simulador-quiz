@@ -1,8 +1,8 @@
 /* =========================================
-   1. ESTILOS BASE (FONDO GRIS CLARO LIMPIO)
+   1. ESTILOS BASE Y FONDO
    ========================================= */
 body {
-    background-color: #f3f4f6; /* Gris suave profesional */
+    background-color: #f3f4f6; /* Fondo gris claro */
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
@@ -40,8 +40,8 @@ body {
 
 .header-right-group {
     display: flex;
-    flex-direction: column; 
-    align-items: flex-end; 
+    flex-direction: column; /* Apila verticalmente */
+    align-items: flex-end; /* Alinea todo a la derecha */
     gap: 5px;
 }
 
@@ -72,7 +72,7 @@ body {
 .btn-logout-integrated:hover { background-color: #dc2626; }
 
 /* =========================================
-   3. TARJETA BLANCA CENTRAL
+   3. TARJETA CENTRAL Y CONTROLES
    ========================================= */
 .app-card {
     background: #ffffff;
@@ -81,44 +81,22 @@ body {
     border: 1px solid #e5e7eb;
     width: 90%;
     max-width: 450px; 
-    margin: 40px auto; /* Margin top 40px desde el header */
+    margin: 10px auto 40px auto; /* Reducimos el margen superior para subir el contenido */
     padding: 30px;
     text-align: center;
     position: relative;
 }
 
-/* Inputs y Selects */
+/* Inputs, Selects, Botones... (Resto de estilos) */
 .input-group { text-align: left; margin-bottom: 15px; }
 .input-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 5px; }
-.input-box { 
-    width: 100%; padding: 10px; 
-    border: 1px solid #ddd; border-radius: 8px; 
-    background: #fff; font-size: 0.95rem; color: #333;
-}
+.input-box { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 0.95rem; color: #333; }
 .input-box:focus { outline: 2px solid #1a73e8; border-color: transparent; }
-
-/* Botón Google */
-.google-btn {
-    width: 100%; background: white; border: 1px solid #ccc;
-    padding: 12px; border-radius: 50px;
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    cursor: pointer; font-weight: 500; color: #444;
-}
-
-/* Botón Empezar */
-.btn-start {
-    width: 100%; background-color: #1a73e8; color: white;
-    font-weight: bold; padding: 12px; border-radius: 25px;
-    border: none; font-size: 1rem; cursor: pointer; margin-top: 15px;
-    box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2);
-}
-
-/* Estilos de Utilidad */
-.hidden { display: none !important; }
+.google-btn { width: 100%; background: white; border: 1px solid #ccc; padding: 12px; border-radius: 50px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-weight: 500; color: #444; }
+.btn-start { width: 100%; background-color: #1a73e8; color: white; font-weight: bold; padding: 12px; border-radius: 25px; border: none; font-size: 1rem; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 6px rgba(26, 115, 232, 0.2); }
+.btn-start:hover { background-color: #1557b0; }
 .user-info { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
-.sub-actions { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
-
-/* Estilos del Quiz */
+.hidden { display: none !important; }
 .quiz-image { max-width: 100%; border-radius: 8px; border: 1px solid #eee; margin: 10px auto; display: block; }
 .opt { width: 100%; text-align: left; padding: 12px; background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
 .opt:hover:not(:disabled) { background: #f0f9ff; border-color: #1a73e8; }
