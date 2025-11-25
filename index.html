@@ -4,8 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Simulador - Escalabilidad</title>
+
   <link rel="stylesheet" href="stilos.css">
 
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = { darkMode: 'class' };
@@ -16,45 +18,28 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+  <!-- Toast (mensaje flotante) -->
   <style>
-    .img-pregunta { @apply w-full max-w-3xl mx-auto rounded-xl border shadow-md my-4; }
-    .card { @apply bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100; }
-    .btn { @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl border shadow-sm transition hover:-translate-y-0.5 active:translate-y-0; }
-    .btn-primary { @apply bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700; }
-    .btn-ghost { @apply bg-white hover:bg-gray-50; }
-    .pill { @apply text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border; }
-    .opt { @apply w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition; }
-    .opt[disabled] { @apply opacity-90; }
-    .ring-ok { @apply ring-2 ring-green-300; }
-    .ring-sel { @apply ring-2 ring-indigo-300; }
-    .dark body { @apply bg-slate-950 text-slate-100; }
-    .dark .card { @apply bg-slate-900/70 border-slate-800; }
-    .dark .btn-ghost { @apply bg-slate-900 hover:bg-slate-800 border-slate-700; }
-    .dark .pill { @apply bg-slate-800 text-slate-200 border-slate-700; }
-    .dark .opt { @apply bg-slate-900 border-slate-700 hover:bg-slate-800; }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #dc2626;
+      color: white;
+      padding: 14px 18px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px #0003;
+      font-weight: bold;
+      opacity: 0;
+      animation: show 3s ease forwards;
+    }
+    @keyframes show {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
   </style>
-  <style>
-.toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #dc2626;
-  color: white;
-  padding: 14px 18px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px #0003;
-  font-weight: bold;
-  opacity: 0;
-  animation: show 3s ease forwards;
-}
-@keyframes show {
-  0% { opacity: 0; transform: translateY(-10px); }
-  10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-10px); }
-}
-</style>
-
 </head>
 
 <body class="min-h-full bg-gradient-to-b from-slate-50 to-slate-100">
@@ -64,7 +49,6 @@
   <h1>🌐Simulador Escalabilidad de Redes🛜</h1>
   <button class="holo-btn">STALIN SOFTWARE</button>
 </header>
-
 
 <!-- PANEL LOGIN -->
 <section id="authPanel" class="max-w-md mx-auto mt-8 p-6 card">
@@ -99,133 +83,62 @@
 </section>
 
 
-<!-- PANEL APP (AZUL PROFESIONAL) -->
+<!-- PANEL APP -->
 <section id="appPanel" class="max-w-5xl mx-auto p-4 hidden">
   <section class="p-5 shadow-lg rounded-2xl bg-white/80 backdrop-blur border border-blue-200">
 
-      <!-- HEADER DEL PANEL -->
-      <div class="flex flex-wrap gap-3 items-center border-b border-blue-200 pb-3 mb-4">
-        <span class="font-semibold text-sm text-blue-700 flex items-center gap-1">
+      <div class="flex justify-between items-center mb-4">
+        <span class="font-semibold text-blue-700">
           🔵📚 Escalabilidad de Redes
         </span>
 
-        <select id="modo" class="border border-blue-300 rounded-xl px-3 py-1.5 text-sm focus:ring focus:ring-blue-400">
+        <button id="btnLogout"
+          class="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 transition">
+          Salir
+        </button>
+      </div>
+
+      <!-- CONTROLES -->
+      <div class="flex flex-wrap gap-3 items-center border-b border-blue-200 pb-3 mb-4">
+
+        <select id="modo" class="border border-blue-300 rounded-xl px-3 py-1.5 text-sm">
           <option value="examen">Examen (30 Preguntas)</option>
           <option value="estudio">Estudio (Todas las Preguntas)</option>
         </select>
 
-        <select id="minutos" class="border border-blue-300 rounded-xl px-3 py-1.5 text-sm focus:ring focus:ring-blue-400">
+        <select id="minutos" class="border border-blue-300 rounded-xl px-3 py-1.5 text-sm">
           <option value="60">60 min</option>
           <option value="30">30 min</option>
           <option value="15">15 min</option>
           <option value="0">Sin tiempo</option>
         </select>
 
-        <div class="ml-auto flex items-center gap-2 text-sm font-semibold text-blue-800">
-          <span>⏱</span>
+        <div class="ml-auto flex items-center gap-1">
+          <span class="text-blue-700">⏱</span>
           <span id="timer">--:--</span>
         </div>
       </div>
 
       <!-- BOTONES -->
       <div class="flex flex-wrap gap-2">
-        <button id="btnEmpezar" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition">
-          Empezar
-        </button>
-
-        <button id="btnGuardar" class="px-4 py-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-          Guardar
-        </button>
-
-        <button id="btnCargar" class="px-4 py-2 rounded-xl bg-blue-100 text-blue-700 hover:bg-blue-200 transition">
-          Cargar
-        </button>
+        <button id="btnEmpezar" class="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Empezar</button>
+        <button id="btnGuardar" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200">Guardar</button>
+        <button id="btnCargar"  class="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200">Cargar</button>
       </div>
 
       <!-- ESTADO -->
-      <div id="estado" class="mt-4 p-3 rounded-xl border border-blue-200 bg-white/80 backdrop-blur text-sm">
-        Selecciona el modo de estudio/examen y presiona <b>Empezar</b>.
+      <div id="estado" class="mt-4 p-3 rounded-xl border border-blue-200 bg-white/80">
+        Selecciona el modo y presiona <b>Empezar</b>.
       </div>
 
       <div id="contenedor" class="mt-3"></div>
   </section>
 </section>
 
-
-<!-- FIREBASE INIT CORREGIDO -->
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBU1oaDdq6qD4fTiLN41SAeQg6Kp06gDXk",
-    authDomain: "simulador-tics.firebaseapp.com",
-    projectId: "simulador-tics",
-    storageBucket: "simulador-tics.appspot.com",  /* ✔ CORREGIDO */
-    messagingSenderId: "501091859008",
-    appId: "1:501091859008:web:80e4596d2adcb5adbf7da5",
-    measurementId: "G-5LFLE4MBPH"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-</script>
-
-
-<!-- AUTH.JS COMPLETO -->
-<script>
-  const authPanel = document.getElementById('authPanel');
-  const appPanel = document.getElementById('appPanel');
-  const email = document.getElementById('email');
-  const password = document.getElementById('password');
-  const msg = document.getElementById('authMsg');
-  const btnLogin = document.getElementById('btnLogin');
-  const btnRegistro = document.getElementById('btnRegistro');
-  const btnGoogle = document.getElementById('btnGoogle');
-
-  const btnLogout = document.createElement("button");
-  btnLogout.id = "btnLogout";
-  btnLogout.textContent = "Salir";
-  btnLogout.className = "hidden";
-  document.body.appendChild(btnLogout);
-
-  // Login normal
-  btnLogin.onclick = () =>
-    auth.signInWithEmailAndPassword(email.value, password.value)
-      .catch(e => msg.textContent = e.message);
-
-  // Registro
-  btnRegistro.onclick = () =>
-    auth.createUserWithEmailAndPassword(email.value, password.value)
-      .catch(e => msg.textContent = e.message);
-
-  // Google Sign-In
-  btnGoogle.onclick = () =>
-    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-      .catch(e => msg.textContent = e.message);
-
-  // Logout
-  btnLogout.onclick = () => auth.signOut();
-
-  // Cambios de estado
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      authPanel.classList.add('hidden');
-      appPanel.classList.remove('hidden');
-      btnLogout.classList.remove('hidden');
-    } else {
-      authPanel.classList.remove('hidden');
-      appPanel.classList.add('hidden');
-      btnLogout.classList.add('hidden');
-    }
-  });
-</script>
-
-
-<!-- APP JS -->
-<script src="app.js?v=11"></script>
+<!-- SCRIPTS ORDENADOS CORRECTAMENTE -->
 <script src="firebase-init.js"></script>
 <script src="auth.js"></script>
-<script src="app.js"></script>
-
+<script src="aplicacion.js"></script>
 
 </body>
 </html>
