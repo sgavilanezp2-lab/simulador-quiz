@@ -1,4 +1,4 @@
-// --- LISTA BLANCA ---
+// --- LISTA BLANCA DE CORREOS ---
 const correosPermitidos = [
   "dpachecog2@unemi.edu.ec", "cnavarretem4@unemi.edu.ec", "htigrer@unemi.edu.ec",
   "gorellanas2@unemi.edu.ec", "iastudillol@unemi.edu.ec", "sgavilanezp2@unemi.edu.ec",
@@ -8,15 +8,7 @@ const correosPermitidos = [
   "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com"
 ];
 
-function toast(msg) {
-  let t = document.createElement("div");
-  t.className = "toast";
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-// Elementos del DOM
+// --- REFERENCIAS DOM ---
 const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
 const email = document.getElementById("email");
@@ -27,142 +19,140 @@ const btnRegistro = document.getElementById("btnRegistro");
 const btnGoogle = document.getElementById("btnGoogle");
 const btnLogout = document.getElementById("btnLogout");
 
-// --- GENERAR ID DE DISPOSITIVO ---
+// --- UTILIDAD: TOAST ---
+function toast(msg) {
+  let t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// --- 1. GENERAR ID DE DISPOSITIVO ÚNICO ---
 function getDeviceId() {
-  let id = localStorage.getItem("deviceId");
+  let id = localStorage.getItem("deviceId_secure");
   if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("deviceId", id);
+    id = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now();
+    localStorage.setItem("deviceId_secure", id);
   }
   return id;
 }
 
-// --- REGISTRAR INTENTO FALLIDO (no bloquea el login) ---
-async function registrarIntentoFallido(correo) {
+// --- 2. VALIDAR SOLO DISPOSITIVOS (Sin IP) ---
+async function validarSeguridad(user) {
   try {
-    await db.collection("loginAttempts").add({
-      email: correo,
-      fecha: new Date(),
-      dispositivo: getDeviceId()
-    });
-  } catch(e) {
-    console.warn("No se pudo registrar intento:", e.message);
-  }
-}
+    const userRef = db.collection("usuarios_seguros").doc(user.email); 
+    const snap = await userRef.get();
+    const miDispositivo = getDeviceId();
 
-// --- VALIDAR DISPOSITIVOS (async, no bloquea la entrada) ---
-async function validarDispositivos(user) {
-  try {
-    const ref = db.collection("users").doc(user.uid);
-    const snap = await ref.get();
-    const devId = getDeviceId();
-
+    // A) USUARIO NUEVO
     if (!snap.exists) {
-      await ref.set({
+      await userRef.set({
+        uid: user.uid,
         email: user.email,
-        devices: [devId],
-        lastLogin: new Date()
+        dispositivos: [miDispositivo],
+        ultimoAcceso: new Date()
       });
-      return true;
+      return { permitido: true };
     }
 
-    let data = snap.data();
-    let devices = data.devices || [];
+    // B) USUARIO EXISTENTE
+    const data = snap.data();
+    let dispositivos = data.dispositivos || [];
 
-    if (!devices.includes(devId)) {
-      if (devices.length >= 2) {
-        return false;
+    // Verificación: ¿Es este navegador uno de los registrados?
+    if (dispositivos.includes(miDispositivo)) {
+      await userRef.update({ ultimoAcceso: new Date() });
+      return { permitido: true };
+    } else {
+      // DISPOSITIVO NUEVO - ¿Tiene cupo? (Máximo 2)
+      if (dispositivos.length < 2) {
+        dispositivos.push(miDispositivo);
+        await userRef.update({ dispositivos: dispositivos, ultimoAcceso: new Date() });
+        return { permitido: true };
+      } else {
+        return { 
+          permitido: false, 
+          msg: "⛔ Límite de dispositivos excedido (PC + Celular). No puedes usar un tercer equipo." 
+        };
       }
-      devices.push(devId);
     }
-
-    await ref.update({
-      devices,
-      lastLogin: new Date()
-    });
-
-    return true;
-
-  } catch(e) {
-    console.warn("Error validando dispositivos:", e.message);
-    return true; // si falla Firestore, dejar pasar para no bloquear acceso
+  } catch (error) {
+    console.error("Error seguridad:", error);
+    return { permitido: true }; // En caso de error de red, permitimos entrar
   }
 }
 
-// --- LOGIN ---
+// --- LOGICA DE LOGIN ---
 btnLogin.onclick = async () => {
   try {
     let correo = email.value.trim().toLowerCase();
-
     if (!correosPermitidos.includes(correo)) {
-      toast("ACCESO DENEGADO");
-      registrarIntentoFallido(correo);
+      toast("⛔ Correo no autorizado.");
       return;
     }
-
     await auth.signInWithEmailAndPassword(correo, password.value);
-
   } catch (e) {
-    authMsg.textContent = e.message;
+    authMsg.textContent = "Error: " + e.message;
   }
 };
 
-// --- REGISTRO ---
 btnRegistro.onclick = async () => {
   try {
     let correo = email.value.trim().toLowerCase();
-
     if (!correosPermitidos.includes(correo)) {
-      toast("ACCESO DENEGADO");
-      registrarIntentoFallido(correo);
+      toast("⛔ Correo no autorizado.");
       return;
     }
-
     await auth.createUserWithEmailAndPassword(correo, password.value);
-
+    toast("✅ Registro exitoso. Ingresando...");
   } catch (e) {
-    authMsg.textContent = e.message;
+    authMsg.textContent = "Error Registro: " + e.message;
   }
 };
 
-// --- GOOGLE LOGIN ---
 btnGoogle.onclick = async () => {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
     const result = await auth.signInWithPopup(provider);
-
     let correo = result.user.email.toLowerCase();
 
     if (!correosPermitidos.includes(correo)) {
-      toast("ACCESO DENEGADO");
-      registrarIntentoFallido(correo);
       await auth.signOut();
+      toast("⛔ Correo Google no autorizado.");
       return;
     }
-
   } catch (e) {
     authMsg.textContent = e.message;
   }
 };
 
-// LOGOUT
-btnLogout.onclick = () => auth.signOut();
+// Botón Salir
+if (btnLogout) {
+  btnLogout.onclick = () => {
+    auth.signOut();
+    window.location.reload();
+  };
+}
 
-// SESIÓN
+// --- MONITOR DE SESIÓN ---
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     authPanel.classList.add("hidden");
-    appPanel.classList.remove("hidden");
+    const validacion = await validarSeguridad(user);
 
-    // Validar dispositivos en segundo plano
-    validarDispositivos(user).then(permitido => {
-      if (!permitido) {
-        toast("Límite de dispositivos (2) excedido");
-        registrarIntentoFallido(user.email);
-        auth.signOut();
-      }
-    });
-
+    if (validacion.permitido) {
+      appPanel.classList.remove("hidden");
+      authMsg.textContent = "";
+    } else {
+      toast(validacion.msg);
+      authMsg.textContent = validacion.msg; 
+      await auth.signOut();
+      setTimeout(() => {
+        authPanel.classList.remove("hidden");
+        appPanel.classList.add("hidden");
+      }, 2500);
+    }
   } else {
     authPanel.classList.remove("hidden");
     appPanel.classList.add("hidden");
