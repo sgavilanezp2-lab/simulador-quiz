@@ -1,9 +1,6 @@
-// ===============================
-// APP - Simulador Escalabilidad
-// ===============================
-
 // Configuración
-const MATERIA_URL = 'escalabilidad.json'; // Asegúrate que el JSON esté junto al index.html
+// CORRECCIÓN: Se agrega la carpeta "preguntas/"
+const MATERIA_URL = 'preguntas/escalabilidad.json'; 
 const CANTIDAD_EXAMEN = 30;
 const MATERIA_NOMBRE = 'escalabilidad';
 
@@ -30,12 +27,11 @@ function fmt(seg){ const m=Math.floor(seg/60).toString().padStart(2,'0'); const 
 
 async function cargarMateria(){
   const res = await fetch(MATERIA_URL); 
-  if(!res.ok) throw new Error('No pude cargar el banco de preguntas (escalabilidad.json)');
+  if(!res.ok) throw new Error('No pude cargar el banco de preguntas (verifique preguntas/escalabilidad.json)');
   const data = await res.json();
   return data;
 }
 
-// Lógica de Timer
 function iniciarTimer(){
   clearInterval(interval);
   let seg = parseInt(minutosSel.value,10)*60;
@@ -47,12 +43,10 @@ function iniciarTimer(){
   },1000);
 }
 
-// Renderizado de Pregunta
 function mostrarPregunta(){
   if (idx >= ronda.length) { finalizar(false); return; }
   const q = ronda[idx];
 
-  // --- HTML DE LA PREGUNTA (CON IMAGEN SI EXISTE) ---
   contenedor.innerHTML = `
     <div class="bg-white/80 backdrop-blur shadow-xl rounded-2xl border border-gray-100 p-5">
       <div class="flex items-center gap-2 mb-2">
@@ -63,35 +57,25 @@ function mostrarPregunta(){
       
       ${q.imagen ? `
       <div class="flex justify-center my-4">
-        <img src="${q.imagen}" alt="Imagen de topología"
+        <img src="${q.imagen}" alt="Imagen pregunta"
               class="max-w-full md:max-w-xl rounded-xl border shadow-md">
       </div>
       ` : ''}
 
       <div id="opciones" class="space-y-2"></div>
-
       <div id="feedback" class="mt-4 text-sm"></div>
 
       <div class="mt-5 flex gap-2">
-        <button id="btnPrev" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition"
-                ${idx===0 ? "disabled" : ""}>Anterior</button>
-
-        <button id="btnNext" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition">
-          Siguiente
-        </button>
-
-        <button id="btnFin" class="ml-auto px-4 py-2 rounded-xl border bg-indigo-600 text-white hover:bg-indigo-700 transition">
-          Finalizar
-        </button>
+        <button id="btnPrev" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition" ${idx===0 ? "disabled" : ""}>Anterior</button>
+        <button id="btnNext" class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 transition">Siguiente</button>
+        <button id="btnFin" class="ml-auto px-4 py-2 rounded-xl border bg-indigo-600 text-white hover:bg-indigo-700 transition">Finalizar</button>
       </div>
     </div>
   `;
 
   const wrap = document.getElementById('opciones');
   wrap.innerHTML = q.opciones.map((op,i)=>`
-    <button
-      class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition text-gray-700"
-      data-i="${i}">
+    <button class="opt w-full text-left px-4 py-3 rounded-xl border bg-white hover:bg-indigo-50 transition text-gray-700" data-i="${i}">
       ${op}
     </button>
   `).join('');
@@ -106,9 +90,7 @@ function mostrarPregunta(){
 
   if (respuestas[idx] != null){
     deshabilitarOpciones(q.respuesta, respuestas[idx], modoSel.value==='examen');
-    if (modoSel.value==='estudio'){
-      mostrarFeedback(respuestas[idx]===q.respuesta, q);
-    }
+    if (modoSel.value==='estudio') mostrarFeedback(respuestas[idx]===q.respuesta, q);
   }
 }
 
@@ -133,7 +115,6 @@ function mostrarFeedback(ok, q){
   const box = document.getElementById('feedback');
   const correcta = q.opciones[q.respuesta];
   const exp = q.explicacion ? ` ${q.explicacion}` : '';
-
   if(ok){
     box.className = 'mt-3 text-sm rounded border bg-green-50 border-green-200 text-green-800 px-3 py-2';
     box.textContent = '✅ ¡Correcto!' + exp;
@@ -147,12 +128,8 @@ function deshabilitarOpciones(indiceCorrecta, indiceElegida, soloMarcar){
   document.querySelectorAll('#opciones .opt').forEach((b,i)=>{
     b.disabled = true;
     b.classList.add('disabled:opacity-80');
-    if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) {
-      b.classList.add('ring-2','ring-green-300', 'bg-green-50');
-    }
-    if (i===indiceElegida) {
-      b.classList.add('ring-2','ring-indigo-300');
-    }
+    if (!soloMarcar && indiceCorrecta!=null && i===indiceCorrecta) b.classList.add('ring-2','ring-green-300', 'bg-green-50');
+    if (i===indiceElegida) b.classList.add('ring-2','ring-indigo-300');
   });
 }
 
@@ -171,15 +148,12 @@ async function finalizar(porTiempo){
 btnEmpezar.onclick = async () => {
   try{
     btnEmpezar.disabled = true;
-    estado.textContent = 'Cargando preguntas de Escalabilidad...';
+    estado.textContent = 'Cargando preguntas...';
     contenedor.innerHTML = '';
     correctas = 0; respuestas = []; idx = 0;
     banco = await cargarMateria(); 
-    if (modoSel.value === 'examen') {
-        ronda = sample(banco, CANTIDAD_EXAMEN);
-    } else {
-        ronda = shuffle(banco); 
-    }
+    if (modoSel.value === 'examen') ronda = sample(banco, CANTIDAD_EXAMEN);
+    else ronda = shuffle(banco); 
     estado.textContent = `Modo: ${modoSel.value.toUpperCase()} — Preguntas: ${ronda.length}`;
     mostrarPregunta();
     iniciarTimer();
@@ -190,7 +164,6 @@ btnEmpezar.onclick = async () => {
   }
 };
 
-// Guardar y Cargar localmente
 const STORAGE_KEY = 'simulador_quiz_estado_v1';
 btnGuardar && (btnGuardar.onclick = ()=>{
   const data = { materia: MATERIA_NOMBRE, modo: modoSel.value, minutos: minutosSel.value, ronda, idx, correctas, respuestas };
