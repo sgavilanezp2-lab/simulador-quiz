@@ -21,10 +21,6 @@ const btnCargar = document.getElementById('btnCargar');
 const modoSel = document.getElementById('modo');
 const minutosSel = document.getElementById('minutos');
 
-// Sonidos
-const sonidoCorrecto = document.getElementById('sonidoCorrecto');
-const sonidoIncorrecto = document.getElementById('sonidoIncorrecto');
-
 // Variables
 let banco = [];
 let ronda = [];
@@ -53,14 +49,12 @@ btnEmpezar.onclick = async () => {
     btnEmpezar.innerText = "Cargando...";
 
     const exito = await cargarMateria();
-
     if (!exito) {
         btnEmpezar.disabled = false;
         btnEmpezar.innerText = "Reintentar";
         return;
     }
 
-    // Iniciar
     respuestasUsuario = [];
     idx = 0;
 
@@ -72,7 +66,6 @@ btnEmpezar.onclick = async () => {
 
     startScreen.classList.add('hidden');
     quizContainer.classList.remove('hidden');
-
     iniciarTimer();
     mostrarPregunta();
 };
@@ -81,14 +74,24 @@ btnEmpezar.onclick = async () => {
 function iniciarTimer() {
     clearInterval(interval);
     let seg = parseInt(minutosSel.value, 10) * 60;
-    if (seg <= 0) { timerEl.textContent = '∞'; return; }
+
+    if (seg <= 0) {
+        timerEl.textContent = '∞';
+        return;
+    }
 
     timerEl.textContent = fmt(seg);
+
     interval = setInterval(() => {
-        seg--; timerEl.textContent = fmt(seg);
-        if (seg <= 0) { clearInterval(interval); finalizarQuiz(true); }
+        seg--;
+        timerEl.textContent = fmt(seg);
+        if (seg <= 0) {
+            clearInterval(interval);
+            finalizarQuiz(true);
+        }
     }, 1000);
 }
+
 function fmt(s) {
     const m = Math.floor(s / 60).toString().padStart(2, '0');
     const sec = (s % 60).toString().padStart(2, '0');
@@ -98,17 +101,21 @@ function fmt(s) {
 // 4. RENDERIZAR PREGUNTA
 function mostrarPregunta() {
     seleccionTemporal = null;
-    if (idx >= ronda.length) { finalizarQuiz(false); return; }
+
+    if (idx >= ronda.length) {
+        finalizarQuiz(false);
+        return;
+    }
 
     const q = ronda[idx];
 
     preguntaRender.innerHTML = `
         <h2 class="text-lg font-bold text-gray-800 mb-4">${q.pregunta}</h2>
-        
+
         ${q.imagen ? `
-            <div class="flex justify-center mb-4">
-                <img src="${q.imagen}" class="quiz-image">
-            </div>` : ''}
+        <div class="flex justify-center mb-4">
+            <img src="${q.imagen}" class="quiz-image">
+        </div>` : ''}
 
         <div id="opcionesBox" class="flex flex-col gap-2"></div>
 
@@ -119,8 +126,8 @@ function mostrarPregunta() {
         </div>
     `;
 
-    // Opciones
     const opcionesBox = document.getElementById('opcionesBox');
+
     q.opciones.forEach((op, i) => {
         const btn = document.createElement('button');
         btn.className = "opt";
@@ -132,92 +139,49 @@ function mostrarPregunta() {
     document.getElementById('btnSiguiente').onclick = avanzar;
 }
 
-// 5. SELECCIÓN DE RESPUESTA (CON RETROALIMENTACIÓN)
+// ⭐⭐⭐ RETROALIMENTACIÓN INMEDIATA EN MODO ESTUDIO ⭐⭐⭐
 function seleccionar(index, btnRef) {
+    const q = ronda[idx];
+    const all = document.querySelectorAll('#opcionesBox button');
+    const btnNext = document.getElementById('btnSiguiente');
 
-    // MODO ESTUDIO → retroalimentación inmediata
+    all.forEach(b => b.classList.remove('option-selected', 'ans-correct', 'ans-wrong'));
+
+    seleccionTemporal = index;
+
+    // ⭐ MODO ESTUDIO → RETROALIMENTACIÓN INMEDIATA
     if (modoSel.value === "estudio") {
 
-        const preguntaActual = ronda[idx];
-        const opcionesBtns = document.querySelectorAll('#opcionesBox button');
-
-        opcionesBtns.forEach(b => b.disabled = true);
-
-        // Marcar selección del usuario
-        btnRef.classList.add('option-selected');
-
-        const feedbackDiv = document.createElement('div');
-        feedbackDiv.className = "mt-3 p-3 rounded font-bold text-sm border";
-
-        // RESPUESTA CORRECTA
-        if (index === preguntaActual.respuesta) {
-
-            sonidoCorrecto.currentTime = 0;
-            sonidoCorrecto.play();
-
-            btnRef.classList.add('ans-correct');
-            feedbackDiv.textContent = "✓ ¡Correcto!";
-            feedbackDiv.style.color = "#166534";
-            feedbackDiv.style.background = "#dcfce7";
-            feedbackDiv.style.borderColor = "#86efac";
-
+        if (index === q.respuesta) {
+            btnRef.classList.add("ans-correct");
         } else {
-
-            sonidoIncorrecto.currentTime = 0;
-            sonidoIncorrecto.play();
-
-            btnRef.classList.add('ans-wrong');
-            const correctaBtn = opcionesBtns[preguntaActual.respuesta];
-            correctaBtn.classList.add('ans-correct');
-
-            feedbackDiv.innerHTML = `
-                ✗ Incorrecto.<br>
-                <span class="text-sm">La respuesta correcta es:</span><br>
-                <span class="font-bold">${preguntaActual.opciones[preguntaActual.respuesta]}</span>
-            `;
-
-            feedbackDiv.style.color = "#991b1b";
-            feedbackDiv.style.background = "#fee2e2";
-            feedbackDiv.style.borderColor = "#fca5a5";
+            btnRef.classList.add("ans-wrong");
+            all[q.respuesta].classList.add("ans-correct");
         }
 
-        // EXPLICACIÓN
-        if (preguntaActual.explicacion) {
-            const expDiv = document.createElement('div');
-            expDiv.className = "mt-3 p-2 text-xs text-gray-700 bg-gray-100 border border-gray-300 rounded italic";
-            expDiv.innerHTML = `📘 Explicación: ${preguntaActual.explicacion}`;
-            feedbackDiv.appendChild(expDiv);
+        if (q.explicacion) {
+            const box = document.createElement("div");
+            box.className = "bg-blue-50 border border-blue-200 p-3 rounded mt-3 text-sm text-blue-800";
+            box.innerHTML = `<b>Explicación:</b> ${q.explicacion}`;
+            preguntaRender.appendChild(box);
         }
 
-        document.getElementById('preguntaRender').appendChild(feedbackDiv);
-
-        respuestasUsuario.push(index);
-
-        const btnNext = document.getElementById('btnSiguiente');
         btnNext.disabled = false;
         btnNext.style.opacity = "1";
 
         return;
     }
 
-    // MODO EXAMEN → original
-    seleccionTemporal = index;
-
-    const all = document.querySelectorAll('#opcionesBox button');
-    all.forEach(b => b.classList.remove('option-selected'));
+    // ⭐ MODO EXAMEN → SIN RETROALIMENTACIÓN
     btnRef.classList.add('option-selected');
-
-    const btnNext = document.getElementById('btnSiguiente');
     btnNext.disabled = false;
     btnNext.style.opacity = "1";
 }
 
+// CONTINUAR
 function avanzar() {
-    if (modoSel.value === "examen") {
-        if (seleccionTemporal === null) return;
-        respuestasUsuario.push(seleccionTemporal);
-    }
-
+    if (seleccionTemporal === null) return;
+    respuestasUsuario.push(seleccionTemporal);
     idx++;
     mostrarPregunta();
 }
@@ -228,17 +192,21 @@ function finalizarQuiz(tiempo) {
     resultScreen.classList.remove('hidden');
 
     let aciertos = 0;
-    ronda.forEach((p, i) => { if (respuestasUsuario[i] === p.respuesta) aciertos++; });
+    ronda.forEach((p, i) => {
+        if (respuestasUsuario[i] === p.respuesta) aciertos++;
+    });
+
     scoreDisplay.textContent = `${aciertos} / ${ronda.length}`;
 
     if (tiempo) alert("Tiempo terminado.");
 }
 
-// 6. REVISIÓN
+// 5. REVISIÓN
 btnReview.onclick = () => {
     resultScreen.classList.add('hidden');
     reviewContainer.classList.remove('hidden');
     reviewActions.classList.remove('hidden');
+
     reviewContainer.innerHTML = '';
 
     ronda.forEach((p, i) => {
@@ -249,6 +217,7 @@ btnReview.onclick = () => {
         card.className = "bg-white p-4 rounded border shadow-sm mb-4";
 
         let html = `<p class="font-bold mb-2">${i + 1}. ${p.pregunta}</p>`;
+
         if (p.imagen) html += `<img src="${p.imagen}" class="quiz-image" style="max-height:150px;">`;
 
         p.opciones.forEach((op, k) => {
@@ -260,7 +229,9 @@ btnReview.onclick = () => {
             html += `<div class="p-2 rounded border mb-1 ${cls}">${op}</div>`;
         });
 
-        if (p.explicacion) html += `<div class="text-xs text-gray-500 mt-2 italic bg-gray-100 p-2">Nota: ${p.explicacion}</div>`;
+        if (p.explicacion)
+            html += `<div class="text-xs text-gray-500 mt-2 italic bg-gray-100 p-2">Nota: ${p.explicacion}</div>`;
+
         card.innerHTML = html;
         reviewContainer.appendChild(card);
     });
@@ -268,19 +239,21 @@ btnReview.onclick = () => {
 
 // Guardado
 const KEY = 'simulador_data';
-btnGuardar.onclick = () => { 
-    localStorage.setItem(KEY, JSON.stringify({ ronda, respuestasUsuario, idx })); 
-    alert("Guardado."); 
+
+btnGuardar.onclick = () => {
+    localStorage.setItem(KEY, JSON.stringify({ ronda, respuestasUsuario, idx }));
+    alert("Guardado.");
 };
+
 btnCargar.onclick = () => {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d) { 
-        ronda = d.ronda; 
-        respuestasUsuario = d.respuestasUsuario; 
-        idx = d.idx; 
-        startScreen.classList.add('hidden'); 
-        quizContainer.classList.remove('hidden'); 
-        iniciarTimer(); 
-        mostrarPregunta(); 
+    if (d) {
+        ronda = d.ronda;
+        respuestasUsuario = d.respuestasUsuario;
+        idx = d.idx;
+        startScreen.classList.add('hidden');
+        quizContainer.classList.remove('hidden');
+        iniciarTimer();
+        mostrarPregunta();
     } else alert("No hay datos.");
 };
