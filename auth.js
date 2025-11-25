@@ -1,11 +1,11 @@
-// LISTA BLANCA DE CORREOS AUTORIZADOS
+// LISTA BLANCA
 const correosPermitidos = [
   "dpachecog2@unemi.edu.ec", "cnavarretem4@unemi.edu.ec", "htigrer@unemi.edu.ec",
   "gorellanas2@unemi.edu.ec", "iastudillol@unemi.edu.ec", "sgavilanezp2@unemi.edu.ec",
   "jzamoram9@unemi.edu.ec", "fcarrillop@unemi.edu.ec", "naguilarb@unemi.edu.ec",
   "ehidalgoc4@unemi.edu.ec", "lbrionesg3@unemi.edu.ec", "xsalvadorv@unemi.edu.ec",
   "nbravop4@unemi.edu.ec", "jmoreirap6@unemi.edu.ec", "kholguinb2@unemi.edu.ec",
-  "jcastrof8@unemi.edu.ec" // Añadido para pruebas
+  "jcastrof8@unemi.edu.ec", "ky2112h@gmail.com", "stalin5766@gmail.com"
 ];
 
 // Referencias DOM
@@ -13,15 +13,10 @@ const authPanel = document.getElementById("authPanel");
 const appPanel = document.getElementById("appPanel");
 const authMsg = document.getElementById("authMsg");
 const btnGoogle = document.getElementById("btnGoogle");
-// Referencia al botón integrado en el Header
+// REFERENCIA CORREGIDA: Botón dentro del Header
 const btnLogout = document.getElementById("btnLogoutHeader"); 
 
-// UI Usuario
-const userEmailDisplay = document.getElementById("userEmailDisplay");
-const verificationMsg = document.getElementById("verificationMsg");
-
-
-// ID Dispositivo
+// Validar Seguridad
 function getDeviceId() {
   let id = localStorage.getItem("deviceId_secure");
   if (!id) {
@@ -31,7 +26,6 @@ function getDeviceId() {
   return id;
 }
 
-// Validar Dispositivos en Firestore
 async function validarSeguridad(user) {
   try {
     const userRef = db.collection("usuarios_seguros").doc(user.email); 
@@ -62,8 +56,7 @@ async function validarSeguridad(user) {
       }
     }
   } catch (error) {
-    console.error("Error seguridad:", error);
-    // Permite entrar para que la BD no bloquee la app si falla la conexión
+    console.error("Error seguridad (DB):", error);
     return { permitido: true }; 
   }
 }
@@ -85,7 +78,7 @@ btnGoogle.onclick = async () => {
   }
 };
 
-// Botón Logout (Conectado al nuevo botón en el Header)
+// Botón Logout
 if (btnLogout) {
   btnLogout.onclick = () => {
     auth.signOut().then(() => window.location.reload());
@@ -95,22 +88,23 @@ if (btnLogout) {
 // MONITOR DE SESIÓN
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    // 1. Mostrar Correo Inmediatamente (Para que el usuario se vea reconocido)
-    if(userEmailDisplay) userEmailDisplay.textContent = user.email;
-    
-    // 2. Ocultar Login
     authPanel.classList.add("hidden");
     
-    // 3. Validar Seguridad en BD
     const validacion = await validarSeguridad(user);
 
     if (validacion.permitido) {
-      // ÉXITO: Mostrar App y Botón de Cerrar Sesión
+      // ÉXITO: Mostrar App y Botón
       appPanel.classList.remove("hidden");
       if(btnLogout) btnLogout.classList.remove("hidden"); 
       
-      // MOSTRAR MENSAJE VERDE DE VALIDACIÓN
-      if(verificationMsg) verificationMsg.classList.remove("hidden"); 
+      // ****** SOLUCIÓN A LA REGRESIÓN ******
+      // Forzamos la búsqueda de los elementos de texto aquí
+      const userEmailDisplay = document.getElementById("userEmailDisplay");
+      const verificationMsg = document.getElementById("verificationMsg");
+      
+      if(userEmailDisplay) userEmailDisplay.textContent = user.email; // Pone el correo
+      if(verificationMsg) verificationMsg.classList.remove("hidden"); // Muestra el mensaje verde
+      // *************************************
 
     } else {
       // FALLO (Límite de Dispositivos)
