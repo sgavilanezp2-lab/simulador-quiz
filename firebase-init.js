@@ -1,4 +1,3 @@
-// Inicialización Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBU1oaDdq6qD4fTiLN41SAeQg6Kp06gDXk",
   authDomain: "simulador-tics.firebaseapp.com",
