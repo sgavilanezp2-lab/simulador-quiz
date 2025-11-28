@@ -23,6 +23,18 @@
     "imagen": "imagen/sucursales.png" 
   },
   {
+    "pregunta": "¿Qué mecanismo o grupo de protocolos podría evitar que un host quede aislado de la red en caso de falla del router predeterminado?",
+    "opciones": [
+      "Protocolo Frame Relay (FR)",
+      "Protocolo FHRP (First Hop Redundancy Protocol)",
+      "Protocolo SPT (Spanning Tree Protocol)",
+      "Protocolo WDM (Wavelength Division Multiplexing)"
+    ],
+    "respuesta": 1,
+    "explicacion": "Los Protocolos de Redundancia de Primer Salto (FHRP), como HSRP o VRRP, aseguran que si el router principal (First Hop) falla, el host pueda usar automáticamente un router secundario para evitar el aislamiento de la red. ",
+    "imagen": "imagen/aislado.png" 
+  },
+  {
     "pregunta": "¿Por qué SDH y SONET son considerados pilares en las redes de telecomunicaciones modernas?",
     "opciones": [
       "Porque utilizan el algoritmo DUAL para una rápida convergencia.",
@@ -1015,4 +1027,5 @@
     "explicacion": "La tabla de topología contiene toda la información necesaria para calcular las mejores rutas (sucesores) y las rutas de respaldo (sucesores factibles)."
   }
 ]
+
 
