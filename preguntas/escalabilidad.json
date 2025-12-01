@@ -17,9 +17,9 @@
     "1 = Capa de gestión de servicios, 2 = Capa de control de red, 3 = Capa de transporte, 4 = Capa de acceso.",
     "1 = Capa de acceso, 2 = Capa de control de red, 3 = Capa de transporte, 4 = Capa de gestión de servicios."
   ],
-  "respuesta": 1,
+  "respuesta": 0,
   "explicacion": "La arquitectura NGN se organiza en capas donde la gestión de servicios se ubica sobre el control de red, seguida del transporte y finalmente el acceso. Por ello, la opción b presenta el orden correcto.",
-  "imagen": "./imgen/ngn.png"
+  "imagen": "imgen/ngn.png"
   },
   {
     "pregunta": "De acuerdo con el gráfico de Venn, ¿en qué tipo de red convergente se integran las siguientes tecnologías: Redes de Datos, Redes Fijas, Redes Móviles, VoIP y 3G?",
@@ -936,7 +936,7 @@
       "network 192.168.10.0 area 0",
       "router 192.168.10.0"
     ],
-    "respuesta": 1,
+    "respuesta": 0,
     "explicacion": "En la configuración moderna de EIGRP, la máscara de subred conectada se utiliza automáticamente a menos que se especifique una máscara *wildcard* (lo cual no es común en EIGRP)."
   },
   {
@@ -1074,6 +1074,7 @@
     "explicacion": "La tabla de topología contiene toda la información necesaria para calcular las mejores rutas (sucesores) y las rutas de respaldo (sucesores factibles)."
   }
 ]
+
 
 
 
